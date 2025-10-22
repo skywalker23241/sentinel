@@ -10,6 +10,7 @@ const pageConfig: PageConfig = {
     { link: 'https://jackcooper.qzz.io/', label: 'Blog', highlight: true },
     { link: 'https://github.com/skywalker23241', label: 'GitHub' },
     { link: 'https://www.hopp.bio/junbo-le/', label: 'Social' },
+    { link: 'http://jackcooper.vn.kg/', label: 'Notes' },
   ],
 
   // 分组展示（可选）
@@ -44,6 +45,18 @@ const workerConfig: WorkerConfig = {
       expectedCodes: [200],
       hideLatencyChart: false,
     },
+
+    {
+      id: 'main_site_monitor',
+      name: 'Mi Notes Blog Site',
+      method: 'GET',
+      target: 'http://jackcooper.vn.kg/',
+      tooltip: '小米笔记同步站运行情况',
+      statusPageLink: 'http://jackcooper.vn.kg/',
+      timeout: 10000,
+      expectedCodes: [200],
+      hideLatencyChart: false,
+    },
   ],
 
   // 通知配置
@@ -67,13 +80,26 @@ const workerConfig: WorkerConfig = {
 
   // 回调函数（可自定义逻辑）
   callbacks: {
-    onStatusChange: async (env: any, monitor: any, isUp: boolean, timeIncidentStart: number, timeNow: number, reason: string) => {
+    onStatusChange: async (
+      env: any,
+      monitor: any,
+      isUp: boolean,
+      timeIncidentStart: number,
+      timeNow: number,
+      reason: string
+    ) => {
       // 状态变更时触发
-      console.log(`Monitor ${monitor.name} is now ${isUp ? 'UP' : 'DOWN'}`);
+      console.log(`Monitor ${monitor.name} is now ${isUp ? 'UP' : 'DOWN'}`)
     },
-    onIncident: async (env: any, monitor: any, timeIncidentStart: number, timeNow: number, reason: string) => {
+    onIncident: async (
+      env: any,
+      monitor: any,
+      timeIncidentStart: number,
+      timeNow: number,
+      reason: string
+    ) => {
       // 故障期间每分钟触发一次
-      console.log(`Incident ongoing for ${monitor.name}: ${reason}`);
+      console.log(`Incident ongoing for ${monitor.name}: ${reason}`)
     },
   },
 }

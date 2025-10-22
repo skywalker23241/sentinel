@@ -3,13 +3,13 @@ import { MaintenanceConfig, PageConfig, WorkerConfig } from './types/config'
 // 状态页基础配置
 const pageConfig: PageConfig = {
   // 状态页标题
-  title: "Jack Cooper's Status Page",
+  title: "JC's Status Page",
 
   // 顶部导航链接
   links: [
-    { link: 'https://jackcooper.qzz.io/', label: 'Website', highlight: true },
-    { link: 'https://github.com/lyc8503', label: 'GitHub' },
-    { link: 'mailto:me@lyc8503.net', label: 'Contact' },
+    { link: 'https://jackcooper.qzz.io/', label: 'Blog', highlight: true },
+    { link: 'https://github.com/skywalker23241', label: 'GitHub' },
+    { link: 'https://www.hopp.bio/junbo-le/', label: 'Social' },
   ],
 
   // 分组展示（可选）
@@ -38,7 +38,7 @@ const workerConfig: WorkerConfig = {
       name: 'JackCooper Main Website',
       method: 'GET',
       target: 'http://jackcooper.qzz.io/',
-      tooltip: 'JackCooper 主站运行情况',
+      tooltip: 'Blog站运行情况',
       statusPageLink: 'http://jackcooper.qzz.io/',
       timeout: 10000,
       expectedCodes: [200],

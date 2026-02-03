@@ -44,19 +44,7 @@ const workerConfig: WorkerConfig = {
       timeout: 10000,
       expectedCodes: [200],
       hideLatencyChart: false,
-    },
-
-    {
-      id: 'main_site_monitor',
-      name: 'Mi Notes Blog Site',
-      method: 'GET',
-      target: 'http://jackcooper.vn.kg/',
-      tooltip: '小米笔记同步站运行情况',
-      statusPageLink: 'http://jackcooper.vn.kg/',
-      timeout: 10000,
-      expectedCodes: [200],
-      hideLatencyChart: false,
-    },
+    }
   ],
 
   // 通知配置

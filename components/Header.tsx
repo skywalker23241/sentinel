@@ -22,7 +22,7 @@ export default function Header({ style }: { style?: React.CSSProperties }) {
 
   return (
     <header className={classes.header} style={style}>
-      <Container size="md" className={classes.inner}>
+      <Container size="xl" className={classes.inner}>
         <div>
           <a
             href={location.pathname == '/' ? 'https://github.com/lyc8503/UptimeFlare' : '/'}

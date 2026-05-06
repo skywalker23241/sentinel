@@ -3,6 +3,7 @@ import { useMediaQuery } from '@mantine/hooks'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
 import { pageConfig } from '@/uptime.config'
+import classes from '@/styles/MaintenanceAlert.module.css'
 
 export default function MaintenanceAlert({
   maintenance,
@@ -20,12 +21,7 @@ export default function MaintenanceAlert({
     <Alert
       icon={<IconAlertTriangle />}
       title={
-        <span
-          style={{
-            fontSize: '1rem',
-            fontWeight: 700,
-          }}
-        >
+        <span className={classes.title}>
           {(upcoming ? '[Upcoming] ' : '') + (maintenance.title || 'Scheduled Maintenance')}
         </span>
       }
@@ -33,38 +29,18 @@ export default function MaintenanceAlert({
         upcoming ? pageConfig.maintenances?.upcomingColor ?? 'gray' : maintenance.color || 'yellow'
       }
       withCloseButton={false}
-      style={{ margin: '16px auto 0 auto', ...style }}
+      className={classes.alert}
+      style={style}
     >
-      {/* Date range in top right (desktop) or inline (mobile) */}
       <div
-        style={{
-          ...{
-            top: 10,
-            fontSize: '0.85rem',
-            borderRadius: 6,
-          },
-          ...(isDesktop
-            ? {
-                position: 'absolute',
-                right: 10,
-                padding: '2px 8px',
-                textAlign: 'right',
-              }
-            : { marginBottom: 4 }),
-        }}
+        className={`${classes.dateBlock} ${isDesktop ? classes.dateBlockDesktop : ''}`}
       >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'auto 1fr',
-            gridColumnGap: '3px',
-          }}
-        >
-          <div style={{ textAlign: 'right', fontWeight: 'bold' }}>
+        <div className={classes.dateGrid}>
+          <div className={classes.dateLabel}>
             {upcoming ? 'Scheduled for:' : 'From:'}
           </div>
           <div>{new Date(maintenance.start).toLocaleString()}</div>
-          <div style={{ textAlign: 'right', fontWeight: 'bold' }}>
+          <div className={classes.dateLabel}>
             {upcoming ? 'Expected end:' : 'To:'}
           </div>
           <div>
@@ -73,7 +49,7 @@ export default function MaintenanceAlert({
         </div>
       </div>
 
-      <Text style={{ paddingTop: '3px', whiteSpace: 'pre-line' }}>{maintenance.body}</Text>
+      <Text className={classes.body}>{maintenance.body}</Text>
       {maintenance.monitors && maintenance.monitors.length > 0 && (
         <>
           <Text mt="xs">

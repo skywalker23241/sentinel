@@ -2,16 +2,23 @@ import { MonitorState, MonitorTarget } from '@/types/config'
 import { getColor } from '@/util/color'
 import { Box, Tooltip, Modal } from '@mantine/core'
 import { useResizeObserver } from '@mantine/hooks'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import type { TimeRange } from '@/hooks/useViewPreferences'
+import { timeRangeToDays } from '@/hooks/useViewPreferences'
+import { pickBarDayCount } from '@/util/uptime'
+import classes from '@/styles/DetailBar.module.css'
+
 const moment = require('moment')
 require('moment-precise-range-plugin')
 
 export default function DetailBar({
   monitor,
   state,
+  timeRange = '90d',
 }: {
   monitor: MonitorTarget
   state: MonitorState
+  timeRange?: TimeRange
 }) {
   const [barRef, barRect] = useResizeObserver()
   const [modalOpened, setModalOpened] = useState(false)
@@ -22,19 +29,31 @@ export default function DetailBar({
     return Math.max(0, Math.min(x2, y2) - Math.max(x1, y1))
   }
 
+  const totalDays = timeRangeToDays(timeRange)
+
+  // Decide how many days to actually render: bounded by both the user's
+  // chosen range AND the available container width. This replaces the
+  // old `visibleFrom="540"` blanket-hide on small screens.
+  const dayCount = useMemo(() => {
+    if (barRect.width === 0) return totalDays
+    return Math.min(totalDays, pickBarDayCount(barRect.width, totalDays))
+  }, [barRect.width, totalDays])
+
   const uptimePercentBars = []
 
   const currentTime = Math.round(Date.now() / 1000)
-  const montiorStartTime = state.incident[monitor.id][0].start[0]
+  const monitorStartTime = state.incident[monitor.id][0].start[0]
 
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
 
-  for (let i = 89; i >= 0; i--) {
+  // Render the most recent `dayCount` days. i = (dayCount - 1) means the
+  // oldest of the chosen window; i = 0 is today.
+  for (let i = dayCount - 1; i >= 0; i--) {
     const dayStart = Math.round(todayStart.getTime() / 1000) - i * 86400
     const dayEnd = dayStart + 86400
 
-    const dayMonitorTime = overlapLen(dayStart, dayEnd, montiorStartTime, currentTime)
+    const dayMonitorTime = overlapLen(dayStart, dayEnd, monitorStartTime, currentTime)
     let dayDownTime = 0
 
     let incidentReasons: string[] = []
@@ -46,12 +65,13 @@ export default function DetailBar({
       const overlap = overlapLen(dayStart, dayEnd, incidentStart, incidentEnd)
       dayDownTime += overlap
 
-      // Incident history for the day
       if (overlap > 0) {
-        for (let i = 0; i < incident.error.length; i++) {
-          let partStart = incident.start[i]
+        for (let j = 0; j < incident.error.length; j++) {
+          let partStart = incident.start[j]
           let partEnd =
-            i === incident.error.length - 1 ? incident.end ?? currentTime : incident.start[i + 1]
+            j === incident.error.length - 1
+              ? incident.end ?? currentTime
+              : incident.start[j + 1]
           partStart = Math.max(partStart, dayStart)
           partEnd = Math.min(partEnd, dayEnd)
 
@@ -64,7 +84,7 @@ export default function DetailBar({
               hour: '2-digit',
               minute: '2-digit',
             })
-            incidentReasons.push(`[${startStr}-${endStr}] ${incident.error[i]}`)
+            incidentReasons.push(`[${startStr}-${endStr}] ${incident.error[j]}`)
           }
         }
       }
@@ -94,16 +114,12 @@ export default function DetailBar({
         }
       >
         <div
-          style={{
-            height: '20px',
-            width: '7px',
-            background: getColor(dayPercent, false),
-            borderRadius: '2px',
-            marginLeft: '1px',
-            marginRight: '1px',
-          }}
-          onClick={() => {
+          className={classes.day}
+          data-clickable={dayDownTime > 0}
+          style={{ background: getColor(dayPercent, false) }}
+          onClick={(e) => {
             if (dayDownTime > 0) {
+              e.stopPropagation()
               setModalTitle(
                 `🚨 ${monitor.name} incidents at ${new Date(dayStart * 1000).toLocaleDateString()}`
               )
@@ -128,21 +144,12 @@ export default function DetailBar({
         opened={modalOpened}
         onClose={() => setModalOpened(false)}
         title={modalTitle}
-        size={'40em'}
+        size="40em"
       >
         {modelContent}
       </Modal>
-      <Box
-        style={{
-          display: 'flex',
-          flexWrap: 'nowrap',
-          marginTop: '10px',
-          marginBottom: '5px',
-        }}
-        visibleFrom="540"
-        ref={barRef}
-      >
-        {uptimePercentBars.slice(Math.floor(Math.max(9 * 90 - barRect.width, 0) / 9), 90)}
+      <Box className={classes.bar} ref={barRef}>
+        {uptimePercentBars}
       </Box>
     </>
   )

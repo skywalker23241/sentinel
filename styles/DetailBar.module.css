@@ -1,0 +1,27 @@
+.bar {
+  display: flex;
+  flex-wrap: nowrap;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.day {
+  height: var(--bar-height);
+  width: var(--bar-width);
+  border-radius: 2px;
+  margin-left: var(--bar-gap);
+  margin-right: var(--bar-gap);
+  flex-shrink: 0;
+  cursor: default;
+  transition: opacity 0.15s ease;
+}
+
+.day[data-clickable='true'] {
+  cursor: pointer;
+}
+
+.day[data-clickable='true']:hover {
+  opacity: 0.85;
+}

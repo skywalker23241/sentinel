@@ -1,0 +1,19 @@
+.footer {
+  margin-top: var(--mantine-spacing-lg);
+}
+
+.text {
+  text-align: center;
+  margin-top: var(--mantine-spacing-xs);
+  margin-bottom: var(--mantine-spacing-xs);
+  color: var(--text-muted);
+}
+
+.text a {
+  color: var(--mantine-color-blue-5);
+  text-decoration: none;
+}
+
+.text a:hover {
+  text-decoration: underline;
+}

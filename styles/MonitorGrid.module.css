@@ -1,0 +1,52 @@
+.wrapper {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: var(--mantine-spacing-xl) auto 0;
+  padding-inline: clamp(12px, 2vw, 24px);
+}
+
+.grid {
+  display: grid;
+  /* Auto-fit responsive grid: 1 col mobile / 2 col tablet / 3-4 col desktop / 4+ ultra-wide.
+     `min(100%, 380px)` prevents overflow on narrow viewports while letting
+     each card expand to a comfortable reading width on desktops. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: var(--mantine-spacing-md);
+  align-items: stretch;
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+}
+
+.groupCount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-right: 4px;
+}
+
+.accordionRoot {
+  background: transparent;
+  border: none;
+}
+
+.accordionItem {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-card-border);
+  border-radius: var(--radius-card);
+  margin-bottom: var(--mantine-spacing-md);
+  overflow: hidden;
+}
+
+.accordionItem[data-active] {
+  box-shadow: var(--shadow-card);
+}
+
+.accordionPanelContent {
+  padding-top: var(--mantine-spacing-sm);
+}

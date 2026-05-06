@@ -1,18 +1,32 @@
 import Head from 'next/head'
-
 import { Inter } from 'next/font/google'
-import { MonitorState, MonitorTarget } from '@/types/config'
-import { KVNamespace } from '@cloudflare/workers-types'
-import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
-import OverallStatus from '@/components/OverallStatus'
-import Header from '@/components/Header'
-import MonitorList from '@/components/MonitorList'
+import { useState } from 'react'
 import { Center, Text } from '@mantine/core'
-import MonitorDetail from '@/components/MonitorDetail'
+
+import type { MonitorState, MonitorTarget } from '@/types/config'
+import type { KVNamespace } from '@cloudflare/workers-types'
+import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
+
+import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import StatusHero from '@/components/StatusHero/StatusHero'
+import Toolbar from '@/components/Toolbar/Toolbar'
+import MonitorGrid from '@/components/MonitorGrid/MonitorGrid'
+import MonitorDetailModal from '@/components/MonitorGrid/MonitorDetailModal'
+
+import { useLiveState } from '@/hooks/useLiveState'
+import { useViewPreferences } from '@/hooks/useViewPreferences'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
+
+function relativeTime(ms: number): string {
+  const sec = Math.max(0, Math.floor((Date.now() - ms) / 1000))
+  if (sec < 5) return 'just now'
+  if (sec < 60) return `${sec}s ago`
+  if (sec < 3600) return `${Math.floor(sec / 60)}m ago`
+  return `${Math.floor(sec / 3600)}h ago`
+}
 
 export default function Home({
   state: stateStr,
@@ -20,26 +34,79 @@ export default function Home({
 }: {
   state: string
   monitors: MonitorTarget[]
-  tooltip?: string
-  statusPageLink?: string
 }) {
-  let state
-  if (stateStr !== undefined) {
-    state = JSON.parse(stateStr) as MonitorState
+  const initialState = stateStr ? (JSON.parse(stateStr) as MonitorState) : undefined
+
+  // Bail out before any hooks if SSR couldn't read the KV.
+  if (!initialState) {
+    return (
+      <>
+        <Head>
+          <title>{pageConfig.title}</title>
+          <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
+        </Head>
+        <main className={inter.className}>
+          <Header />
+          <Center mt="xl">
+            <Text fw={700}>
+              Monitor State is not defined now, please check your worker&apos;s status and KV
+              binding!
+            </Text>
+          </Center>
+          <Footer />
+        </main>
+      </>
+    )
   }
 
-  // Specify monitorId in URL hash to view a specific monitor (can be used in iframe)
-  const monitorId = window.location.hash.substring(1)
-  if (monitorId) {
-    const monitor = monitors.find((monitor) => monitor.id === monitorId)
-    if (!monitor || !state) {
-      return <Text fw={700}>Monitor with id {monitorId} not found!</Text>
+  return <Dashboard initialState={initialState} initialMonitors={monitors} />
+}
+
+function Dashboard({
+  initialState,
+  initialMonitors,
+}: {
+  initialState: MonitorState
+  initialMonitors: MonitorTarget[]
+}) {
+  const [prefs, setPrefs] = useViewPreferences()
+  const { state, monitors, lastFetched, isRefreshing, refresh } = useLiveState(
+    { state: initialState, monitors: initialMonitors },
+    { enabled: prefs.autoRefresh }
+  )
+
+  // Selected monitor for detail modal (replaces URL hash drill-down)
+  const [selected, setSelected] = useState<MonitorTarget | null>(null)
+
+  // URL hash one-shot drill-down (kept for iframe / deep-link compatibility)
+  const hashMonitorId =
+    typeof window !== 'undefined' ? window.location.hash.substring(1) : ''
+  if (hashMonitorId) {
+    const monitor = monitors.find((m) => m.id === hashMonitorId)
+    if (monitor) {
+      return (
+        <>
+          <Head>
+            <title>{pageConfig.title}</title>
+            <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
+          </Head>
+          <main className={`${inter.className} page-shell`}>
+            <div className="page-main" style={{ maxWidth: '900px' }}>
+              <MonitorDetailModal
+                monitor={monitor}
+                state={state}
+                timeRange={prefs.timeRange}
+                opened
+                onClose={() => {
+                  if (typeof window !== 'undefined')
+                    window.location.hash = ''
+                }}
+              />
+            </div>
+          </main>
+        </>
+      )
     }
-    return (
-      <div style={{ maxWidth: '810px' }}>
-        <MonitorDetail monitor={monitor} state={state} />
-      </div>
-    )
   }
 
   return (
@@ -49,25 +116,50 @@ export default function Home({
         <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
       </Head>
 
-      <main className={inter.className}>
+      <div className={`${inter.className} page-shell`}>
         <Header />
 
-        {state == undefined ? (
-          <Center>
-            <Text fw={700}>
-              Monitor State is not defined now, please check your worker&apos;s status and KV
-              binding!
-            </Text>
-          </Center>
-        ) : (
-          <div>
-            <OverallStatus state={state} monitors={monitors} maintenances={maintenances} />
-            <MonitorList monitors={monitors} state={state} />
-          </div>
-        )}
+        <main className="page-main">
+          <StatusHero state={state} monitors={monitors} maintenances={maintenances} />
+
+          <Toolbar
+            search={prefs.search}
+            onSearchChange={(q) => setPrefs({ search: q })}
+            viewMode={prefs.viewMode}
+            onViewModeChange={(m) => setPrefs({ viewMode: m })}
+            timeRange={prefs.timeRange}
+            onTimeRangeChange={(r) => setPrefs({ timeRange: r })}
+            onRefresh={refresh}
+            isRefreshing={isRefreshing}
+            lastFetchedAgo={relativeTime(lastFetched)}
+          />
+
+          <MonitorGrid
+            monitors={monitors}
+            state={state}
+            search={prefs.search}
+            viewMode={prefs.viewMode}
+            timeRange={prefs.timeRange}
+            expandedGroups={
+              prefs.expandedGroups.length === 0
+                ? Object.keys(pageConfig.group ?? {})
+                : prefs.expandedGroups
+            }
+            onExpandedGroupsChange={(g) => setPrefs({ expandedGroups: g })}
+            onSelect={(m) => setSelected(m)}
+          />
+
+          <MonitorDetailModal
+            monitor={selected}
+            state={state}
+            timeRange={prefs.timeRange}
+            opened={!!selected}
+            onClose={() => setSelected(null)}
+          />
+        </main>
 
         <Footer />
-      </main>
+      </div>
     </>
   )
 }
@@ -77,10 +169,8 @@ export async function getServerSideProps() {
     UPTIMEFLARE_STATE: KVNamespace
   }
 
-  // Read state as string from KV, to avoid hitting server-side cpu time limit
   const state = (await UPTIMEFLARE_STATE?.get('state')) as unknown as MonitorState
 
-  // Only present these values to client
   const monitors = workerConfig.monitors.map((monitor) => {
     return {
       id: monitor.id,

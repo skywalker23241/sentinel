@@ -1,0 +1,106 @@
+.hero {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 40px) clamp(16px, 2vw, 24px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--mantine-spacing-lg);
+  background:
+    linear-gradient(
+      135deg,
+      light-dark(rgba(56, 132, 255, 0.06), rgba(56, 132, 255, 0.10)) 0%,
+      light-dark(rgba(20, 184, 166, 0.04), rgba(20, 184, 166, 0.08)) 100%
+    );
+  border: 1px solid var(--surface-card-border);
+  border-radius: var(--radius-card);
+}
+
+.heroBanner {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--mantine-spacing-md);
+  align-items: center;
+}
+
+@media (max-width: 36em) {
+  .heroBanner {
+    grid-template-columns: minmax(0, 1fr);
+    text-align: center;
+    gap: var(--mantine-spacing-xs);
+  }
+}
+
+.statusHeading {
+  font-weight: 700;
+  font-size: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+  line-height: 1.25;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.lastUpdated {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: var(--mantine-spacing-md);
+}
+
+.kpiCard {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-card-border);
+  border-radius: var(--radius-card);
+  padding: var(--mantine-spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.kpiLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.kpiValue {
+  font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--kpi-tone-color, var(--text-primary));
+  line-height: 1.1;
+}
+
+.kpiHint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.kpiCard[data-tone='up'] {
+  --kpi-tone-color: var(--status-up);
+}
+.kpiCard[data-tone='down'] {
+  --kpi-tone-color: var(--status-down);
+}
+.kpiCard[data-tone='degraded'] {
+  --kpi-tone-color: var(--status-degraded);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-sm);
+}
+
+.statusTextRow {
+  min-width: 0;
+}

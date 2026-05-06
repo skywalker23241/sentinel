@@ -1,0 +1,154 @@
+import type { CSSProperties } from 'react'
+import type { MonitorState, MonitorTarget } from '@/types/config'
+import { Tooltip } from '@mantine/core'
+import StatusIcon, { type StatusIconTone } from '@/components/StatusIcon'
+import DetailBar from '@/components/DetailBar'
+import DetailChart from '@/components/DetailChart'
+import { getMonitorAvgLatency, getMonitorUptimePercent, isMonitorDown } from '@/util/uptime'
+import { getStatusTone } from '@/util/color'
+import { maintenances as configuredMaintenances } from '@/uptime.config'
+import type { ViewMode, TimeRange } from '@/hooks/useViewPreferences'
+import classes from '@/styles/MonitorCard.module.css'
+
+const stripClass: Record<StatusIconTone, string> = {
+  up: classes.statusStripUp,
+  down: classes.statusStripDown,
+  degraded: classes.statusStripDegraded,
+  maintenance: classes.statusStripMaintenance,
+  unknown: classes.statusStripUnknown,
+}
+
+function resolveTone(state: MonitorState, monitor: MonitorTarget): StatusIconTone {
+  // Maintenance window takes precedence over data-derived status
+  const now = new Date()
+  const inMaintenance = configuredMaintenances.some(
+    (m) =>
+      now >= new Date(m.start) &&
+      (!m.end || now <= new Date(m.end)) &&
+      m.monitors?.includes(monitor.id)
+  )
+  if (inMaintenance) return 'maintenance'
+
+  if (!state.latency[monitor.id]) return 'unknown'
+  if (isMonitorDown(state, monitor.id)) return 'down'
+
+  const up = getMonitorUptimePercent(state, monitor.id)
+  if (up === null) return 'unknown'
+
+  const semantic = getStatusTone(up)
+  if (semantic === 'up' || semantic === 'up-soft') return 'up'
+  if (semantic === 'degraded') return 'degraded'
+  if (semantic === 'down') return 'down'
+  return 'unknown'
+}
+
+export default function MonitorCard({
+  monitor,
+  state,
+  viewMode,
+  timeRange,
+  onSelect,
+}: {
+  monitor: MonitorTarget
+  state: MonitorState
+  viewMode: ViewMode
+  timeRange: TimeRange
+  onSelect?: (monitor: MonitorTarget) => void
+}) {
+  const tone = resolveTone(state, monitor)
+  const hasData = !!state.latency[monitor.id]
+  const uptimePercent = hasData ? getMonitorUptimePercent(state, monitor.id) : null
+  const avgLatency = hasData ? getMonitorAvgLatency(state, monitor.id) : null
+
+  const uptimeStr = uptimePercent !== null ? uptimePercent.toFixed(2) : '—'
+  const uptimeColor =
+    uptimePercent !== null
+      ? `var(--status-${
+          getStatusTone(uptimePercent) === 'up-soft' ? 'up' : getStatusTone(uptimePercent)
+        })`
+      : 'var(--status-unknown)'
+
+  const titleNode = monitor.statusPageLink ? (
+    <a
+      href={monitor.statusPageLink}
+      target="_blank"
+      rel="noreferrer"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {monitor.name}
+    </a>
+  ) : (
+    monitor.name
+  )
+
+  const titleWrapped = monitor.tooltip ? (
+    <Tooltip label={monitor.tooltip} withinPortal>
+      <span className={classes.title}>{titleNode}</span>
+    </Tooltip>
+  ) : (
+    <span className={classes.title}>{titleNode}</span>
+  )
+
+  const handleClick = () => {
+    if (onSelect) onSelect(monitor)
+  }
+
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleClick()
+    }
+  }
+
+  return (
+    <article
+      className={classes.card}
+      onClick={handleClick}
+      onKeyDown={handleKey}
+      role="button"
+      tabIndex={0}
+      aria-label={`${monitor.name} ${uptimeStr}% uptime`}
+    >
+      <span className={`${classes.statusStrip} ${stripClass[tone]}`} aria-hidden />
+
+      <header className={classes.header}>
+        <div className={classes.titleRow}>
+          <StatusIcon tone={tone} size="md" />
+          {titleWrapped}
+        </div>
+        <span
+          className={classes.uptime}
+          style={{ ['--uptime-color' as string]: uptimeColor } as CSSProperties}
+        >
+          {uptimeStr}%
+        </span>
+      </header>
+
+      {!hasData ? (
+        <div className={classes.metaRow}>
+          <span>No data yet — waiting for worker...</span>
+        </div>
+      ) : viewMode === 'compact' ? (
+        <div className={classes.compactBody}>
+          {avgLatency !== null && (
+            <span className={classes.compactStat}>{Math.round(avgLatency)} ms avg</span>
+          )}
+        </div>
+      ) : (
+        <div className={classes.body}>
+          <DetailBar monitor={monitor} state={state} timeRange={timeRange} />
+          {viewMode === 'detailed' && !monitor.hideLatencyChart && (
+            <DetailChart monitor={monitor} state={state} timeRange={timeRange} />
+          )}
+          {avgLatency !== null && (
+            <div className={classes.metaRow}>
+              <span className={classes.metaItem}>
+                Avg latency: {Math.round(avgLatency)} ms
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+    </article>
+  )
+}

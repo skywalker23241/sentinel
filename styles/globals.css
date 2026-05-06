@@ -1,0 +1,116 @@
+/*
+ * Global tokens & resets.
+ *
+ * Strategy:
+ *  - All semantic surface/elevation tokens use `light-dark()` so the entire
+ *    dashboard reacts to `MantineProvider defaultColorScheme="auto"` without
+ *    any per-component branching.
+ *  - Status colors mirror the keys defined in styles/theme.ts -> statusTokens.
+ *  - Bar chart sizing (DetailBar) goes through CSS variables so mobile can
+ *    tighten the daily-uptime strip without a JS branch.
+ */
+
+:root {
+  /* Surfaces (light values; dark values via light-dark below) */
+  --surface-page: light-dark(#ffffff, var(--mantine-color-dark-7));
+  --surface-card: light-dark(#ffffff, var(--mantine-color-dark-6));
+  --surface-card-border: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+  --surface-muted: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5));
+  --surface-overlay: light-dark(rgba(255, 255, 255, 0.78), rgba(20, 21, 23, 0.78));
+
+  /* Text */
+  --text-primary: light-dark(var(--mantine-color-gray-9), var(--mantine-color-gray-0));
+  --text-secondary: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+  --text-muted: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
+
+  /* Status semantic colors.
+   *
+   * For each status we expose three flavors:
+   *  - base: dark-saturated tone for TEXT and inline icons (high contrast)
+   *  - vivid: medium-saturated tone for BAR/INDICATOR fills
+   *  - pale: low-saturated tone for soft-fill backgrounds and "almost ok" bars
+   *
+   * Light mode uses Mantine shade 6/5/2; dark mode mirrors them with shade 4/5/8.
+   */
+  --status-up: light-dark(var(--mantine-color-teal-6), var(--mantine-color-teal-4));
+  --status-up-vivid: light-dark(var(--mantine-color-teal-5), var(--mantine-color-teal-5));
+  --status-up-pale: light-dark(var(--mantine-color-teal-2), var(--mantine-color-teal-8));
+  --status-up-soft: light-dark(var(--mantine-color-teal-1), rgba(38, 166, 154, 0.15));
+
+  --status-degraded: light-dark(var(--mantine-color-orange-6), var(--mantine-color-orange-4));
+  --status-degraded-vivid: light-dark(var(--mantine-color-orange-5), var(--mantine-color-orange-5));
+  --status-degraded-soft: light-dark(var(--mantine-color-orange-1), rgba(255, 167, 38, 0.18));
+
+  --status-down: light-dark(var(--mantine-color-red-6), var(--mantine-color-red-4));
+  --status-down-vivid: light-dark(var(--mantine-color-red-5), var(--mantine-color-red-5));
+  --status-down-soft: light-dark(var(--mantine-color-red-1), rgba(239, 83, 80, 0.18));
+
+  --status-maintenance: light-dark(var(--mantine-color-yellow-7), var(--mantine-color-yellow-4));
+  --status-maintenance-vivid: light-dark(var(--mantine-color-yellow-5), var(--mantine-color-yellow-5));
+  --status-maintenance-soft: light-dark(var(--mantine-color-yellow-1), rgba(253, 216, 53, 0.18));
+
+  --status-unknown: light-dark(var(--mantine-color-gray-5), var(--mantine-color-dark-3));
+  --status-unknown-soft: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+
+  /* Elevation */
+  --shadow-card: light-dark(
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.45)
+  );
+  --shadow-card-hover: light-dark(
+    0 6px 18px -8px rgba(15, 23, 42, 0.18),
+    0 6px 18px -8px rgba(0, 0, 0, 0.6)
+  );
+
+  /* Geometry */
+  --radius-card: 12px;
+  --radius-pill: 9999px;
+  --content-max-width: clamp(320px, 92vw, 1440px);
+
+  /* DetailBar tunables (consumed by DetailBar.module.css) */
+  --bar-height: 22px;
+  --bar-width: 7px;
+  --bar-gap: 1px;
+}
+
+@media (max-width: 36em) {
+  :root {
+    --bar-height: 18px;
+    --bar-width: 6px;
+  }
+}
+
+html,
+body {
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  text-rendering: optimizeLegibility;
+}
+
+/* Reduced motion respects user preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Page-level wrapper utility used by main pages. */
+.page-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin-inline: auto;
+  padding-inline: clamp(12px, 2vw, 24px);
+}

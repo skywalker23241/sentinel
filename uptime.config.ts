@@ -7,15 +7,15 @@ const pageConfig: PageConfig = {
 
   // 顶部导航链接
   links: [
-    { link: 'https://jackcooper.qzz.io/', label: 'Blog', highlight: true },
-    { link: 'https://github.com/skywalker23241', label: 'GitHub' },
-    { link: 'https://www.hopp.bio/junbo-le/', label: 'Social' },
-    { link: 'http://jackcooper.vn.kg/', label: 'Notes' },
+    { link: 'https://jackcooper.qzz.io/', label: '雫', highlight: true },
+    { link: 'https://github.com/skywalker23241', label: 'Repo' },
+    { link: 'https://www.hopp.bio/junbo-le/', label: '关于' },
   ],
 
   // 分组展示（可选）
   group: {
-    '🌐 Main Services': ['main_site_monitor'],
+    '博客站': ['main_site_monitor'],
+    'Valorant站': ['valorant_site_monitor'],
   },
 
   // 图标
@@ -36,7 +36,7 @@ const workerConfig: WorkerConfig = {
   monitors: [
     {
       id: 'main_site_monitor',
-      name: 'JackCooper Main Website',
+      name: '博客站',
       method: 'GET',
       target: 'http://jackcooper.qzz.io/',
       tooltip: 'Blog站运行情况',
@@ -44,7 +44,18 @@ const workerConfig: WorkerConfig = {
       timeout: 10000,
       expectedCodes: [200],
       hideLatencyChart: false,
-    }
+    },
+    {
+      id: 'valorant_site_monitor',
+      name: 'Valorant站',
+      method: 'GET',
+      target: 'https://playvalorant.qzz.io/',
+      tooltip: 'Valorant站运行情况',
+      statusPageLink: 'https://playvalorant.qzz.io/',
+      timeout: 10000,
+      expectedCodes: [200],
+      hideLatencyChart: false,
+    },
   ],
 
   // 通知配置

@@ -3,10 +3,9 @@ import { MantineThemeOverride } from '@mantine/core'
 /**
  * Semantic status tokens.
  *
- * Each status maps to a Mantine palette key + shade pair so that components
- * can resolve the actual CSS color via `theme.colors[key][shade]` at runtime
- * (or via the `var(--mantine-color-{key}-{shade})` CSS variable inside CSS
- * Modules with `light-dark()` for automatic dark-mode adaptation).
+ * Components resolve actual CSS colors via the `--status-*` variables in
+ * styles/globals.css. The palette keys remain for Mantine API callers
+ * (Alert color, Badge color, etc.).
  */
 export const statusTokens = {
   up: { key: 'teal', shade: 6, lighter: 4 },
@@ -19,18 +18,38 @@ export const statusTokens = {
 export type StatusTone = keyof typeof statusTokens
 
 /**
- * Mantine theme override.
- * Keep `primaryColor: 'blue'` to stay aligned with the existing Header gradient.
+ * SIGNAL OPS Mantine theme.
+ *
+ * - `colors.dark` is remapped to the ink-blue ramp so every built-in dark
+ *   surface (inputs, dropdowns, modals, accordion hover) sits on the same
+ *   palette as the custom CSS.
+ * - Display font carries UI chrome; mono carries data (set per-component
+ *   in CSS Modules via --font-stack-mono).
  */
 export const theme: MantineThemeOverride = {
-  primaryColor: 'blue',
+  primaryColor: 'teal',
   fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif',
-  defaultRadius: 'md',
-  // Fluid heading sizes – clamp() lets each title scale smoothly from mobile to 4K
-  // without per-breakpoint media queries.
+    "var(--font-display), 'PingFang SC', 'Microsoft YaHei', sans-serif",
+  fontFamilyMonospace: "var(--font-mono), ui-monospace, 'Cascadia Mono', monospace",
+  defaultRadius: 'sm',
+  colors: {
+    // 0 (lightest) -> 9 (darkest): ink-blue ramp matching --surface-* tokens
+    dark: [
+      '#dce8ee',
+      '#aebfca',
+      '#7d93a2',
+      '#54707f',
+      '#2c4252',
+      '#1b2e3c',
+      '#13212d',
+      '#0c1822',
+      '#081019',
+      '#04070b',
+    ],
+  },
   headings: {
-    fontWeight: '700',
+    fontWeight: '600',
+    fontFamily: "var(--font-display), 'PingFang SC', 'Microsoft YaHei', sans-serif",
     sizes: {
       h1: { fontSize: 'clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem)', lineHeight: '1.2' },
       h2: { fontSize: 'clamp(1.25rem, 1rem + 1.1vw, 1.75rem)', lineHeight: '1.25' },
@@ -40,8 +59,22 @@ export const theme: MantineThemeOverride = {
       h6: { fontSize: '0.875rem', lineHeight: '1.45' },
     },
   },
-  // Surface tokens & semantic status colors live here so they're visible to
-  // both `useMantineTheme()` consumers and CSS Modules (via vars below).
+  components: {
+    Tooltip: {
+      defaultProps: {
+        styles: {
+          tooltip: {
+            fontFamily: "var(--font-mono), ui-monospace, monospace",
+            fontSize: '0.72rem',
+            background: '#0d1822',
+            color: '#9db4c0',
+            border: '1px solid #234050',
+            borderRadius: 3,
+          },
+        },
+      },
+    },
+  },
   other: {
     statusTokens,
     surface: {
@@ -52,7 +85,7 @@ export const theme: MantineThemeOverride = {
     },
     radius: {
       card: 'var(--radius-card)',
-      pill: '9999px',
+      pill: 'var(--radius-pill)',
     },
     shadow: {
       card: 'var(--shadow-card)',

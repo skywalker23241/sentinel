@@ -40,6 +40,31 @@
   width: 100%;
 }
 
+/* Mono input text + ink surfaces for Mantine inputs inside the toolbar */
+.toolbar :global(.mantine-Input-input) {
+  font-family: var(--font-stack-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  background: var(--surface-muted);
+  border-color: var(--surface-card-border-strong);
+  color: var(--text-primary);
+  border-radius: 3px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.toolbar :global(.mantine-Input-input::placeholder) {
+  color: var(--text-muted);
+}
+
+.toolbar :global(.mantine-Input-input:focus) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-faint), var(--glow-up);
+}
+
+.toolbar :global(.mantine-Input-section) {
+  color: var(--text-muted);
+}
+
 .controls {
   display: flex;
   align-items: center;
@@ -57,7 +82,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.78rem;
+  font-family: var(--font-stack-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
   color: var(--text-muted);
   white-space: nowrap;
 }
@@ -71,7 +98,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 36em) {

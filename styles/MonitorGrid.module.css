@@ -13,9 +13,6 @@
 
 .grid {
   display: grid;
-  /* Auto-fit responsive grid: 1 col mobile / 2 col tablet / 3-4 col desktop / 4+ ultra-wide.
-     `min(100%, 380px)` prevents overflow on narrow viewports while letting
-     each card expand to a comfortable reading width on desktops. */
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
   gap: var(--mantine-spacing-md);
   align-items: stretch;
@@ -24,7 +21,7 @@
 .wrapper[data-layout='sidebar'] .grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .groupHeader {
@@ -35,11 +32,24 @@
   gap: var(--mantine-spacing-sm);
 }
 
+.groupHeader > :first-child {
+  font-family: var(--font-stack-mono) !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
 .groupCount {
+  font-family: var(--font-stack-mono);
+  font-size: 0.68rem !important;
   font-weight: 600;
+  letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   padding-right: 4px;
+  text-transform: uppercase;
 }
 
 .accordionRoot {
@@ -56,13 +66,23 @@
 }
 
 .wrapper[data-layout='sidebar'] .accordionItem {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   background: transparent;
-  border-color: var(--surface-card-border);
+  border: 0;
+  border-bottom: 1px solid var(--surface-card-border);
+  border-radius: 0;
+}
+
+.wrapper[data-layout='sidebar'] .accordionItem:last-child {
+  border-bottom: 0;
 }
 
 .accordionItem[data-active] {
   box-shadow: var(--shadow-card);
+}
+
+.wrapper[data-layout='sidebar'] .accordionItem[data-active] {
+  box-shadow: none;
 }
 
 .accordionPanelContent {
@@ -70,5 +90,5 @@
 }
 
 .wrapper[data-layout='sidebar'] .accordionPanelContent {
-  padding: 0;
+  padding: 0 0 6px;
 }

@@ -5,10 +5,10 @@ import {
   LinearScale,
   PointElement,
   LineElement,
-  Title,
+  Filler,
   Tooltip as ChartTooltip,
-  Legend,
   TimeScale,
+  type ScriptableContext,
 } from 'chart.js'
 import 'chartjs-adapter-moment'
 import { useMemo } from 'react'
@@ -22,11 +22,36 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  Title,
+  Filler,
   ChartTooltip,
-  Legend,
   TimeScale
 )
+
+// chart.js paints onto canvas and CANNOT resolve CSS var() strings — every
+// color here must be a concrete value. These mirror the SIGNAL OPS tokens
+// in styles/globals.css.
+const HUD = {
+  line: '#2ee59d',
+  fillTop: 'rgba(46, 229, 157, 0.22)',
+  fillBottom: 'rgba(46, 229, 157, 0)',
+  grid: 'rgba(118, 146, 165, 0.09)',
+  tick: '#5d7585',
+  tooltipBg: '#0d1822',
+  tooltipBorder: '#234050',
+  tooltipText: '#e6f2ee',
+  tooltipMuted: '#9db4c0',
+}
+
+const MONO = "'IBM Plex Mono', ui-monospace, monospace"
+
+function verticalGradient(context: ScriptableContext<'line'>) {
+  const { ctx, chartArea } = context.chart
+  if (!chartArea) return HUD.fillBottom
+  const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
+  gradient.addColorStop(0, HUD.fillTop)
+  gradient.addColorStop(1, HUD.fillBottom)
+  return gradient
+}
 
 export default function DetailChart({
   monitor,
@@ -38,9 +63,8 @@ export default function DetailChart({
   timeRange?: TimeRange
 }) {
   const data = useMemo(() => {
-    // For short ranges (24h) use the high-resolution `recent` series;
-    // for longer ranges fall back to the hourly `all` series so charts
-    // remain readable across 7d/30d/90d.
+    // Short ranges use the high-resolution `recent` series; longer ranges
+    // use the hourly `all` series so charts stay readable.
     const useRecent = timeRange === '24h'
     const series = useRecent ? state.latency[monitor.id]?.recent : state.latency[monitor.id]?.all
     if (!series) return { datasets: [] }
@@ -54,12 +78,13 @@ export default function DetailChart({
       datasets: [
         {
           data: filtered,
-          // Use light/dark-aware color via CSS variable resolution at paint time
-          // (chart.js accepts any valid CSS color string)
-          borderColor: 'var(--status-up-vivid)',
-          backgroundColor: 'rgba(74, 222, 128, 0.12)',
-          borderWidth: 2,
+          borderColor: HUD.line,
+          backgroundColor: verticalGradient,
+          fill: true,
+          borderWidth: 1.6,
           radius: 0,
+          hoverRadius: 3,
+          pointBackgroundColor: HUD.line,
           cubicInterpolationMode: 'monotone' as const,
           tension: 0.4,
         },
@@ -78,6 +103,16 @@ export default function DetailChart({
       animation: { duration: 0 },
       plugins: {
         tooltip: {
+          backgroundColor: HUD.tooltipBg,
+          borderColor: HUD.tooltipBorder,
+          borderWidth: 1,
+          titleColor: HUD.tooltipMuted,
+          bodyColor: HUD.tooltipText,
+          titleFont: { family: MONO, size: 10 },
+          bodyFont: { family: MONO, size: 12 },
+          padding: 10,
+          cornerRadius: 3,
+          displayColors: false,
           callbacks: {
             label: (item: any) => {
               if (item.parsed.y) {
@@ -87,32 +122,28 @@ export default function DetailChart({
           },
         },
         legend: { display: false },
-        title: {
-          display: true,
-          text: 'Response times (ms)',
-          align: 'start' as const,
-          color: 'var(--text-muted)',
-        },
       },
       scales: {
         x: {
           type: 'time' as const,
-          grid: {
-            color: 'var(--chart-grid)',
-          },
+          grid: { color: HUD.grid },
+          border: { color: HUD.grid },
           ticks: {
             source: 'auto' as const,
             maxRotation: 0,
             autoSkip: true,
-            color: 'var(--text-muted)',
+            maxTicksLimit: 7,
+            color: HUD.tick,
+            font: { family: MONO, size: 10 },
           },
         },
         y: {
-          grid: {
-            color: 'var(--chart-grid)',
-          },
+          grid: { color: HUD.grid },
+          border: { color: HUD.grid },
           ticks: {
-            color: 'var(--text-muted)',
+            maxTicksLimit: 5,
+            color: HUD.tick,
+            font: { family: MONO, size: 10 },
           },
         },
       },
@@ -122,7 +153,7 @@ export default function DetailChart({
 
   return (
     <div style={{ height: 'clamp(120px, 22vw, 220px)', width: '100%' }}>
-      <Line options={options} data={data as any} />
+      <Line options={options as any} data={data as any} />
     </div>
   )
 }

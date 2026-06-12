@@ -1,10 +1,9 @@
-import { Divider, Text } from '@mantine/core'
+import { Text } from '@mantine/core'
 import classes from '@/styles/Footer.module.css'
 
 export default function Footer() {
   return (
     <footer className={classes.footer}>
-      <Divider />
       <Text size="xs" className={classes.text}>
         Open-source monitoring and status page powered by{' '}
         <a href="https://github.com/lyc8503/UptimeFlare" target="_blank" rel="noreferrer">

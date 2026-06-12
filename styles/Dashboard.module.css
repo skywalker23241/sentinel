@@ -2,28 +2,29 @@
   flex: 1;
   width: 100%;
   max-width: min(100%, 1500px);
-  padding: clamp(12px, 2vw, 20px) clamp(12px, 2vw, 24px) clamp(28px, 4vw, 48px);
+  padding: clamp(14px, 2vw, 22px) clamp(12px, 2vw, 24px) clamp(28px, 4vw, 48px);
 }
 
 .dashboardFrame {
   display: grid;
-  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(280px, 350px) minmax(0, 1fr);
   gap: clamp(12px, 2vw, 18px);
   align-items: start;
 }
 
 .sidebarPanel {
   position: sticky;
-  top: 76px;
+  top: 74px;
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 92px);
+  max-height: calc(100vh - 90px);
   min-height: 0;
   overflow: hidden;
   background: var(--surface-card);
   border: 1px solid var(--surface-card-border);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
+  animation: hud-rise 0.45s ease 0.04s both;
 }
 
 .sidebarHeader {
@@ -31,33 +32,48 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--mantine-spacing-sm);
-  padding: 16px 16px 12px;
+  padding: 14px 16px 12px;
   border-bottom: 1px solid var(--surface-card-border);
 }
 
 .sidebarEyebrow {
+  font-family: var(--font-stack-mono);
   color: var(--text-muted);
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
+.sidebarEyebrow::before {
+  content: '// ';
+  color: var(--accent);
+}
+
 .sidebarTitle {
-  margin: 1px 0 0;
+  margin: 2px 0 0;
   color: var(--text-primary);
-  font-size: 1.15rem;
+  font-family: var(--font-stack-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 1.05rem;
   line-height: 1.2;
 }
 
 .sidebarCount {
-  min-width: 34px;
-  height: 28px;
+  min-width: 32px;
+  height: 26px;
   display: inline-grid;
   place-items: center;
-  border-radius: var(--radius-pill);
-  color: var(--status-up);
-  background: var(--status-up-soft);
-  font-weight: 800;
+  padding-inline: 8px;
+  border-radius: 2px;
+  color: var(--accent);
+  background: var(--accent-faint);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  font-family: var(--font-stack-mono);
+  font-weight: 600;
+  font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -65,7 +81,7 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 0 10px 12px;
+  padding: 4px 10px 12px;
 }
 
 .contentPanel {

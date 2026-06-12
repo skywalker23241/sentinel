@@ -2,15 +2,30 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  height: rem(64px);
-  margin-bottom: 0;
+  height: rem(60px);
   background-color: var(--surface-header);
   border-bottom: rem(1px) solid var(--surface-card-border);
-  backdrop-filter: saturate(140%) blur(14px);
+  backdrop-filter: saturate(130%) blur(14px);
+}
+
+/* hairline signal strip across the very top */
+.header::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent) 18%,
+    var(--accent) 42%,
+    transparent 60%
+  );
+  opacity: 0.7;
 }
 
 .inner {
-  height: rem(64px);
+  height: rem(60px);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -19,21 +34,36 @@
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
   color: var(--text-primary);
   text-decoration: none;
 }
 
 .brandMark {
-  width: 36px;
-  height: 36px;
+  position: relative;
+  width: 34px;
+  height: 34px;
   display: inline-grid;
   place-items: center;
+  border-radius: 3px;
+  color: var(--accent);
+  background: var(--accent-faint);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: var(--glow-up);
+}
+
+/* live signal dot pinned to the mark's corner */
+.brandMark::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  color: light-dark(#047857, #062e1a);
-  background: var(--status-up-vivid);
-  box-shadow: 0 0 0 5px light-dark(rgba(20, 184, 166, 0.12), rgba(74, 222, 128, 0.12));
+  background: var(--accent);
+  animation: hud-pulse 2.2s ease-in-out infinite;
 }
 
 .brandText {
@@ -41,28 +71,40 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-family: var(--font-stack-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .link {
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
+  min-height: 32px;
   line-height: 1;
-  padding: rem(8px) rem(13px);
-  border-radius: var(--radius-pill);
+  padding: rem(8px) rem(12px);
+  border-radius: 3px;
+  border: 1px solid transparent;
   text-decoration: none;
   color: var(--text-secondary);
-  font-size: var(--mantine-font-size-sm);
-  font-weight: 700;
+  font-family: var(--font-stack-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 
   @mixin hover {
-    background-color: var(--surface-muted);
+    color: var(--text-primary);
+    border-color: var(--surface-card-border-strong);
+    background: var(--surface-muted);
   }
+}
 
-  [data-mantine-color-scheme] &[data-active] {
-    background-color: var(--status-up-vivid);
-    color: light-dark(#064e3b, #052e1a);
-  }
+[data-mantine-color-scheme] .link[data-active] {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--accent-faint);
 }
 
 @media (max-width: 36em) {
@@ -71,7 +113,7 @@
   }
 
   .link {
-    min-height: 32px;
-    padding-inline: rem(10px);
+    min-height: 30px;
+    padding-inline: rem(9px);
   }
 }

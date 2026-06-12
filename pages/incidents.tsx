@@ -1,6 +1,5 @@
 import Head from 'next/head'
 
-import { Inter } from 'next/font/google'
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
 import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
 import Header from '@/components/Header'
@@ -11,7 +10,6 @@ import MaintenanceAlert from '@/components/MaintenanceAlert'
 import NoIncidentsAlert from '@/components/NoIncidents'
 
 export const runtime = 'experimental-edge'
-const inter = Inter({ subsets: ['latin'] })
 
 function getSelectedMonth() {
   const hash = window.location.hash.replace('#', '')
@@ -84,7 +82,7 @@ export default function IncidentsPage() {
         <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
       </Head>
 
-      <main className={inter.className}>
+      <main className="page-shell">
         <Header
           style={{
             marginBottom: '40px',

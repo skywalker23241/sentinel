@@ -1,20 +1,30 @@
 .footer {
+  position: relative;
+  z-index: 1;
   margin-top: 0;
-  padding: 0 clamp(12px, 2vw, 24px) var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-md) clamp(12px, 2vw, 24px);
+  border-top: 1px solid var(--surface-card-border);
 }
 
 .text {
   text-align: center;
-  margin-top: var(--mantine-spacing-xs);
-  margin-bottom: var(--mantine-spacing-xs);
+  margin-top: 0;
+  margin-bottom: 0;
   color: var(--text-muted);
+  font-family: var(--font-stack-mono);
+  font-size: 0.68rem !important;
+  letter-spacing: 0.05em;
 }
 
 .text a {
-  color: var(--mantine-color-blue-4);
+  color: var(--text-secondary);
   text-decoration: none;
+  border-bottom: 1px dotted var(--text-muted);
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .text a:hover {
-  text-decoration: underline;
+  color: var(--accent);
+  border-color: var(--accent);
+  text-decoration: none;
 }

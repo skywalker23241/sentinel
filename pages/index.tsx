@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import { Inter } from 'next/font/google'
 import { useEffect, useState } from 'react'
 import { Center, Text } from '@mantine/core'
 
@@ -20,7 +19,6 @@ import { useViewPreferences } from '@/hooks/useViewPreferences'
 import classes from '@/styles/Dashboard.module.css'
 
 export const runtime = 'experimental-edge'
-const inter = Inter({ subsets: ['latin'] })
 
 function relativeTime(ms: number): string {
   const sec = Math.max(0, Math.floor((Date.now() - ms) / 1000))
@@ -47,7 +45,7 @@ export default function Home({
           <title>{pageConfig.title}</title>
           <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
         </Head>
-        <main className={inter.className}>
+        <main>
           <Header />
           <Center mt="xl">
             <Text fw={700}>
@@ -109,7 +107,7 @@ function Dashboard({
             <title>{pageConfig.title}</title>
             <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
           </Head>
-          <main className={`${inter.className} page-shell`}>
+          <main className="page-shell">
             <div className="page-main" style={{ maxWidth: '900px' }}>
               <MonitorDetailModal
                 monitor={monitor}
@@ -135,7 +133,7 @@ function Dashboard({
         <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
       </Head>
 
-      <div className={`${inter.className} page-shell`}>
+      <div className="page-shell">
         <Header />
 
         <main className={`page-main ${classes.dashboardMain}`}>

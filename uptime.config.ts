@@ -3,19 +3,22 @@ import { MaintenanceConfig, PageConfig, WorkerConfig } from './types/config'
 // 状态页基础配置
 const pageConfig: PageConfig = {
   // 状态页标题
-  title: "JC's Status Page",
+  title: 'Abo的监控站',
 
   // 顶部导航链接
   links: [
-    { link: 'https://jackcooper.qzz.io/', label: '雫', highlight: true },
-    { link: 'https://github.com/skywalker23241', label: 'Repo' },
-    { link: 'https://www.hopp.bio/junbo-le/', label: '关于' },
+    { link: 'https://jackcooper.qzz.io/', label: 'Blog', highlight: true },
+    { link: 'https://github.com/skywalker23241', label: 'Github' },
+    { link: 'https://www.hopp.bio/junbo-le/', label: 'Social' },
+    { link: 'https://www.abo.qzz.io/', label: 'Resume' },
   ],
 
   // 分组展示（可选）
   group: {
-    '博客站': ['main_site_monitor'],
-    'Valorant站': ['valorant_site_monitor'],
+    Abo的博客站: ['main_site_monitor'],
+    RadiantShelf站: ['valorant_site_monitor'],
+    RestCal站: ['restcal_site-monitor'],
+    Resume网页: ['resume-site-monitor'],
   },
 
   // 图标
@@ -36,10 +39,10 @@ const workerConfig: WorkerConfig = {
   monitors: [
     {
       id: 'main_site_monitor',
-      name: '博客站',
+      name: 'Abo的博客',
       method: 'GET',
       target: 'http://jackcooper.qzz.io/',
-      tooltip: 'Blog站运行情况',
+      tooltip: 'Abo的博客站运行情况',
       statusPageLink: 'http://jackcooper.qzz.io/',
       timeout: 10000,
       expectedCodes: [200],
@@ -47,11 +50,33 @@ const workerConfig: WorkerConfig = {
     },
     {
       id: 'valorant_site_monitor',
-      name: 'Valorant站',
+      name: 'RadiantShelf',
       method: 'GET',
       target: 'https://playvalorant.qzz.io/',
-      tooltip: 'Valorant站运行情况',
+      tooltip: 'RadiantShelf站运行情况',
       statusPageLink: 'https://playvalorant.qzz.io/',
+      timeout: 10000,
+      expectedCodes: [200],
+      hideLatencyChart: false,
+    },
+    {
+      id: 'restcal_site-monitor',
+      name: 'RestCal-休历',
+      method: 'GET',
+      target: 'https://playvalorant.qzz.io/',
+      tooltip: 'RestCal站运行情况',
+      statusPageLink: 'https://abo.qzz.io/restcal/',
+      timeout: 10000,
+      expectedCodes: [200],
+      hideLatencyChart: false,
+    },
+    {
+      id: 'resume-site-monitor',
+      name: 'Resume',
+      method: 'GET',
+      target: 'https://abo.qzz.io/',
+      tooltip: 'Resume站运行情况',
+      statusPageLink: 'https://abo.qzz.io/',
       timeout: 10000,
       expectedCodes: [200],
       hideLatencyChart: false,

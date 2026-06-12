@@ -31,15 +31,7 @@ function resolveTone(state: MonitorState, monitor: MonitorTarget): StatusIconTon
 
   if (!state.latency[monitor.id]) return 'unknown'
   if (isMonitorDown(state, monitor.id)) return 'down'
-
-  const up = getMonitorUptimePercent(state, monitor.id)
-  if (up === null) return 'unknown'
-
-  const semantic = getStatusTone(up)
-  if (semantic === 'up' || semantic === 'up-soft') return 'up'
-  if (semantic === 'degraded') return 'degraded'
-  if (semantic === 'down') return 'down'
-  return 'unknown'
+  return 'up'
 }
 
 export default function MonitorCard({

@@ -4,7 +4,6 @@ import StatusIcon, { type StatusIconTone } from '@/components/StatusIcon'
 import DetailBar from '@/components/DetailBar'
 import DetailChart from '@/components/DetailChart'
 import { getMonitorAvgLatency, getMonitorUptimePercent, isMonitorDown } from '@/util/uptime'
-import { getStatusTone } from '@/util/color'
 import { maintenances as configuredMaintenances } from '@/uptime.config'
 import type { TimeRange } from '@/hooks/useViewPreferences'
 
@@ -19,14 +18,7 @@ function resolveTone(state: MonitorState, monitor: MonitorTarget): StatusIconTon
   if (inMaintenance) return 'maintenance'
   if (!state.latency[monitor.id]) return 'unknown'
   if (isMonitorDown(state, monitor.id)) return 'down'
-
-  const up = getMonitorUptimePercent(state, monitor.id)
-  if (up === null) return 'unknown'
-  const semantic = getStatusTone(up)
-  if (semantic === 'up' || semantic === 'up-soft') return 'up'
-  if (semantic === 'degraded') return 'degraded'
-  if (semantic === 'down') return 'down'
-  return 'unknown'
+  return 'up'
 }
 
 /**

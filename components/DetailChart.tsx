@@ -6,6 +6,7 @@ import {
   PointElement,
   LineElement,
   Filler,
+  Decimation,
   Tooltip as ChartTooltip,
   TimeScale,
   type ScriptableContext,
@@ -23,6 +24,7 @@ ChartJS.register(
   PointElement,
   LineElement,
   Filler,
+  Decimation,
   ChartTooltip,
   TimeScale
 )
@@ -32,7 +34,7 @@ ChartJS.register(
 // in styles/globals.css.
 const HUD = {
   line: '#2ee59d',
-  fillTop: 'rgba(46, 229, 157, 0.22)',
+  fillTop: 'rgba(46, 229, 157, 0.14)',
   fillBottom: 'rgba(46, 229, 157, 0)',
   grid: 'rgba(118, 146, 165, 0.09)',
   tick: '#5d7585',
@@ -81,7 +83,7 @@ export default function DetailChart({
           borderColor: HUD.line,
           backgroundColor: verticalGradient,
           fill: true,
-          borderWidth: 1.6,
+          borderWidth: 1.3,
           radius: 0,
           hoverRadius: 3,
           pointBackgroundColor: HUD.line,
@@ -96,12 +98,21 @@ export default function DetailChart({
     () => ({
       responsive: true,
       maintainAspectRatio: false,
+      // Decimation needs raw {x,y} points without parsing
+      parsing: false as const,
+      normalized: true,
       interaction: {
         mode: 'index' as const,
         intersect: false,
       },
       animation: { duration: 0 },
       plugins: {
+        decimation: {
+          enabled: true,
+          algorithm: 'lttb' as const,
+          samples: 250,
+          threshold: 400,
+        },
         tooltip: {
           backgroundColor: HUD.tooltipBg,
           borderColor: HUD.tooltipBorder,

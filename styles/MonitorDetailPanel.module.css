@@ -1,0 +1,245 @@
+.panel {
+  width: 100%;
+  min-width: 0;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: clamp(16px, 2vw, 22px);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-md);
+}
+
+.titleGroup {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mantine-spacing-sm);
+  min-width: 0;
+}
+
+.titleText {
+  min-width: 0;
+}
+
+.titleText h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(1.35rem, 1.1rem + 1vw, 2rem);
+  line-height: 1.15;
+}
+
+.titleText p {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  min-height: 36px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  color: var(--status-badge-color, var(--text-primary));
+  background: var(--status-badge-bg, var(--surface-muted));
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.statusBadge[data-tone='up'] {
+  --status-badge-color: light-dark(#047857, #052e1a);
+  --status-badge-bg: var(--status-up-vivid);
+}
+
+.statusBadge[data-tone='down'] {
+  --status-badge-color: light-dark(#ffffff, #ffffff);
+  --status-badge-bg: var(--status-down-vivid);
+}
+
+.statusBadge[data-tone='degraded'] {
+  --status-badge-color: light-dark(#7c2d12, #1f1306);
+  --status-badge-bg: var(--status-degraded-vivid);
+}
+
+.statusBadge[data-tone='maintenance'] {
+  --status-badge-color: light-dark(#713f12, #211704);
+  --status-badge-bg: var(--status-maintenance-vivid);
+}
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.methodBadge,
+.externalLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  border-radius: var(--radius-pill);
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.methodBadge {
+  color: var(--text-secondary);
+  background: var(--surface-muted);
+  border: 1px solid var(--surface-card-border);
+}
+
+.externalLink {
+  color: var(--mantine-color-blue-4);
+  text-decoration: none;
+}
+
+.externalLink:hover {
+  text-decoration: underline;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin-top: 18px;
+  border: 1px solid var(--surface-card-border);
+  border-radius: var(--radius-card);
+  background: var(--surface-card-border);
+}
+
+.metricItem {
+  min-width: 0;
+  padding: 15px;
+  background: var(--surface-muted);
+}
+
+.metricItem span,
+.metricItem small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.metricItem strong {
+  display: block;
+  margin: 7px 0 4px;
+  color: var(--text-primary);
+  font-size: clamp(1.15rem, 1rem + 0.55vw, 1.55rem);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.sectionBlock {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--surface-card-border);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-sm);
+  margin-bottom: 8px;
+}
+
+.sectionHeader h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.98rem;
+  line-height: 1.2;
+}
+
+.sectionHeader span {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.emptyState {
+  margin-top: 18px;
+  padding: 28px;
+  border: 1px dashed var(--surface-card-border);
+  border-radius: var(--radius-card);
+  background: var(--surface-muted);
+  text-align: center;
+}
+
+.incidentEmpty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.incidentList {
+  display: grid;
+  gap: 10px;
+}
+
+.incidentItem {
+  position: relative;
+  padding-left: 16px;
+  color: var(--text-secondary);
+}
+
+.incidentItem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status-down-vivid);
+}
+
+.incidentItem strong,
+.incidentItem span {
+  display: block;
+}
+
+.incidentItem strong {
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.incidentItem span {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 58em) {
+  .metricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 36em) {
+  .panelHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .statusBadge {
+    align-self: flex-start;
+  }
+
+  .metricGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -5,6 +5,12 @@
   padding-inline: clamp(12px, 2vw, 24px);
 }
 
+.wrapper[data-layout='sidebar'] {
+  max-width: none;
+  margin: 0;
+  padding-inline: 0;
+}
+
 .grid {
   display: grid;
   /* Auto-fit responsive grid: 1 col mobile / 2 col tablet / 3-4 col desktop / 4+ ultra-wide.
@@ -13,6 +19,12 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
   gap: var(--mantine-spacing-md);
   align-items: stretch;
+}
+
+.wrapper[data-layout='sidebar'] .grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .groupHeader {
@@ -43,10 +55,20 @@
   overflow: hidden;
 }
 
+.wrapper[data-layout='sidebar'] .accordionItem {
+  margin-bottom: 8px;
+  background: transparent;
+  border-color: var(--surface-card-border);
+}
+
 .accordionItem[data-active] {
   box-shadow: var(--shadow-card);
 }
 
 .accordionPanelContent {
   padding-top: var(--mantine-spacing-sm);
+}
+
+.wrapper[data-layout='sidebar'] .accordionPanelContent {
+  padding: 0;
 }

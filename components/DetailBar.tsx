@@ -15,10 +15,12 @@ export default function DetailBar({
   monitor,
   state,
   timeRange = '90d',
+  variant = 'default',
 }: {
   monitor: MonitorTarget
   state: MonitorState
   timeRange?: TimeRange
+  variant?: 'default' | 'mini'
 }) {
   const [barRef, barRect] = useResizeObserver()
   const [modalOpened, setModalOpened] = useState(false)
@@ -42,7 +44,9 @@ export default function DetailBar({
   const uptimePercentBars = []
 
   const currentTime = Math.round(Date.now() / 1000)
-  const monitorStartTime = state.incident[monitor.id][0].start[0]
+  const monitorIncidents = state.incident[monitor.id] ?? []
+  const monitorStartTime =
+    monitorIncidents[0]?.start?.[0] ?? currentTime - totalDays * 86400
 
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
@@ -58,7 +62,7 @@ export default function DetailBar({
 
     let incidentReasons: string[] = []
 
-    for (let incident of state.incident[monitor.id]) {
+    for (let incident of monitorIncidents) {
       const incidentStart = incident.start[0]
       const incidentEnd = incident.end ?? currentTime
 
@@ -148,7 +152,7 @@ export default function DetailBar({
       >
         {modelContent}
       </Modal>
-      <Box className={classes.bar} ref={barRef}>
+      <Box className={classes.bar} data-variant={variant} ref={barRef}>
         {uptimePercentBars}
       </Box>
     </>

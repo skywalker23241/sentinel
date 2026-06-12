@@ -8,7 +8,7 @@ import { theme } from '@/styles/theme'
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <NoSsr>
-      <MantineProvider theme={theme} defaultColorScheme="auto">
+      <MantineProvider theme={theme} defaultColorScheme="dark">
         <Component {...pageProps} />
       </MantineProvider>
     </NoSsr>

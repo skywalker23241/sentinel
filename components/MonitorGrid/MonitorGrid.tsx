@@ -25,20 +25,24 @@ function filterBySearch(monitors: MonitorTarget[], query: string): MonitorTarget
 }
 
 export default function MonitorGrid({
+  layout = 'cards',
   monitors,
   state,
   search,
   viewMode,
   timeRange,
+  selectedId,
   expandedGroups,
   onExpandedGroupsChange,
   onSelect,
 }: {
+  layout?: 'cards' | 'sidebar'
   monitors: MonitorTarget[]
   state: MonitorState
   search: string
   viewMode: ViewMode
   timeRange: TimeRange
+  selectedId?: string
   expandedGroups: string[]
   onExpandedGroupsChange: (groups: string[]) => void
   onSelect?: (monitor: MonitorTarget) => void
@@ -55,7 +59,7 @@ export default function MonitorGrid({
   // No-results state (search filters out everything)
   if (visibleMonitors.length === 0) {
     return (
-      <Box className={classes.wrapper}>
+      <Box className={classes.wrapper} data-layout={layout}>
         <EmptyState
           message={
             search
@@ -75,7 +79,7 @@ export default function MonitorGrid({
     )
 
     return (
-      <Box className={classes.wrapper}>
+      <Box className={classes.wrapper} data-layout={layout}>
         <Accordion
           multiple
           value={expandedGroups}
@@ -118,6 +122,8 @@ export default function MonitorGrid({
                           state={state}
                           viewMode={viewMode}
                           timeRange={timeRange}
+                          layout={layout === 'sidebar' ? 'sidebar' : 'card'}
+                          selected={selectedId === monitor.id}
                           onSelect={onSelect}
                         />
                       ))}
@@ -134,7 +140,7 @@ export default function MonitorGrid({
 
   // Ungrouped layout: a single responsive grid.
   return (
-    <Box className={classes.wrapper}>
+    <Box className={classes.wrapper} data-layout={layout}>
       <div className={classes.grid}>
         {visibleMonitors.map((monitor) => (
           <MonitorCard
@@ -143,6 +149,8 @@ export default function MonitorGrid({
             state={state}
             viewMode={viewMode}
             timeRange={timeRange}
+            layout={layout === 'sidebar' ? 'sidebar' : 'card'}
+            selected={selectedId === monitor.id}
             onSelect={onSelect}
           />
         ))}

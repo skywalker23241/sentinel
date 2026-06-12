@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { Inter } from 'next/font/google'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Center, Text } from '@mantine/core'
 
 import type { MonitorState, MonitorTarget } from '@/types/config'
@@ -13,9 +13,11 @@ import StatusHero from '@/components/StatusHero/StatusHero'
 import Toolbar from '@/components/Toolbar/Toolbar'
 import MonitorGrid from '@/components/MonitorGrid/MonitorGrid'
 import MonitorDetailModal from '@/components/MonitorGrid/MonitorDetailModal'
+import MonitorDetailPanel from '@/components/MonitorDetailPanel'
 
 import { useLiveState } from '@/hooks/useLiveState'
 import { useViewPreferences } from '@/hooks/useViewPreferences'
+import classes from '@/styles/Dashboard.module.css'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
@@ -76,7 +78,24 @@ function Dashboard({
   )
 
   // Selected monitor for detail modal (replaces URL hash drill-down)
-  const [selected, setSelected] = useState<MonitorTarget | null>(null)
+  const [selected, setSelected] = useState<MonitorTarget | null>(
+    () => initialMonitors[0] ?? null
+  )
+
+  useEffect(() => {
+    if (monitors.length === 0) {
+      setSelected(null)
+      return
+    }
+
+    if (!selected || !monitors.some((monitor) => monitor.id === selected.id)) {
+      setSelected(monitors[0])
+    }
+  }, [monitors, selected])
+
+  const selectedMonitor = selected
+    ? monitors.find((monitor) => monitor.id === selected.id) ?? selected
+    : monitors[0] ?? null
 
   // URL hash one-shot drill-down (kept for iframe / deep-link compatibility)
   const hashMonitorId =
@@ -119,43 +138,60 @@ function Dashboard({
       <div className={`${inter.className} page-shell`}>
         <Header />
 
-        <main className="page-main">
-          <StatusHero state={state} monitors={monitors} maintenances={maintenances} />
+        <main className={`page-main ${classes.dashboardMain}`}>
+          <div className={classes.dashboardFrame}>
+            <aside className={classes.sidebarPanel} aria-label="Monitor list">
+              <div className={classes.sidebarHeader}>
+                <div>
+                  <div className={classes.sidebarEyebrow}>Status Board</div>
+                  <h2 className={classes.sidebarTitle}>Monitors</h2>
+                </div>
+                <span className={classes.sidebarCount}>{monitors.length}</span>
+              </div>
 
-          <Toolbar
-            search={prefs.search}
-            onSearchChange={(q) => setPrefs({ search: q })}
-            viewMode={prefs.viewMode}
-            onViewModeChange={(m) => setPrefs({ viewMode: m })}
-            timeRange={prefs.timeRange}
-            onTimeRangeChange={(r) => setPrefs({ timeRange: r })}
-            onRefresh={refresh}
-            isRefreshing={isRefreshing}
-            lastFetchedAgo={relativeTime(lastFetched)}
-          />
+              <Toolbar
+                layout="sidebar"
+                showViewMode={false}
+                search={prefs.search}
+                onSearchChange={(q) => setPrefs({ search: q })}
+                viewMode={prefs.viewMode}
+                onViewModeChange={(m) => setPrefs({ viewMode: m })}
+                timeRange={prefs.timeRange}
+                onTimeRangeChange={(r) => setPrefs({ timeRange: r })}
+                onRefresh={refresh}
+                isRefreshing={isRefreshing}
+                lastFetchedAgo={relativeTime(lastFetched)}
+              />
 
-          <MonitorGrid
-            monitors={monitors}
-            state={state}
-            search={prefs.search}
-            viewMode={prefs.viewMode}
-            timeRange={prefs.timeRange}
-            expandedGroups={
-              prefs.expandedGroups.length === 0
-                ? Object.keys(pageConfig.group ?? {})
-                : prefs.expandedGroups
-            }
-            onExpandedGroupsChange={(g) => setPrefs({ expandedGroups: g })}
-            onSelect={(m) => setSelected(m)}
-          />
+              <div className={classes.sidebarList}>
+                <MonitorGrid
+                  layout="sidebar"
+                  monitors={monitors}
+                  state={state}
+                  search={prefs.search}
+                  viewMode="compact"
+                  timeRange={prefs.timeRange}
+                  selectedId={selectedMonitor?.id}
+                  expandedGroups={
+                    prefs.expandedGroups.length === 0
+                      ? Object.keys(pageConfig.group ?? {})
+                      : prefs.expandedGroups
+                  }
+                  onExpandedGroupsChange={(g) => setPrefs({ expandedGroups: g })}
+                  onSelect={(m) => setSelected(m)}
+                />
+              </div>
+            </aside>
 
-          <MonitorDetailModal
-            monitor={selected}
-            state={state}
-            timeRange={prefs.timeRange}
-            opened={!!selected}
-            onClose={() => setSelected(null)}
-          />
+            <section className={classes.contentPanel} aria-label="Monitor details">
+              <StatusHero state={state} monitors={monitors} maintenances={maintenances} />
+              <MonitorDetailPanel
+                monitor={selectedMonitor}
+                state={state}
+                timeRange={prefs.timeRange}
+              />
+            </section>
+          </div>
         </main>
 
         <Footer />

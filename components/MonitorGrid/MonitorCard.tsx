@@ -47,12 +47,16 @@ export default function MonitorCard({
   state,
   viewMode,
   timeRange,
+  layout = 'card',
+  selected = false,
   onSelect,
 }: {
   monitor: MonitorTarget
   state: MonitorState
   viewMode: ViewMode
   timeRange: TimeRange
+  layout?: 'card' | 'sidebar'
+  selected?: boolean
   onSelect?: (monitor: MonitorTarget) => void
 }) {
   const tone = resolveTone(state, monitor)
@@ -103,6 +107,9 @@ export default function MonitorCard({
   return (
     <article
       className={classes.card}
+      data-layout={layout}
+      data-view={viewMode}
+      data-selected={selected ? 'true' : undefined}
       onClick={handleClick}
       onKeyDown={handleKey}
       role="button"
@@ -130,6 +137,12 @@ export default function MonitorCard({
         </div>
       ) : viewMode === 'compact' ? (
         <div className={classes.compactBody}>
+          <DetailBar
+            monitor={monitor}
+            state={state}
+            timeRange={timeRange}
+            variant="mini"
+          />
           {avgLatency !== null && (
             <span className={classes.compactStat}>{Math.round(avgLatency)} ms avg</span>
           )}

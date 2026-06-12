@@ -56,7 +56,8 @@ export default function DetailChart({
           data: filtered,
           // Use light/dark-aware color via CSS variable resolution at paint time
           // (chart.js accepts any valid CSS color string)
-          borderColor: 'var(--mantine-color-gray-6)',
+          borderColor: 'var(--status-up-vivid)',
+          backgroundColor: 'rgba(74, 222, 128, 0.12)',
           borderWidth: 2,
           radius: 0,
           cubicInterpolationMode: 'monotone' as const,
@@ -90,16 +91,28 @@ export default function DetailChart({
           display: true,
           text: 'Response times (ms)',
           align: 'start' as const,
-          color: 'var(--mantine-color-gray-6)',
+          color: 'var(--text-muted)',
         },
       },
       scales: {
         x: {
           type: 'time' as const,
+          grid: {
+            color: 'var(--chart-grid)',
+          },
           ticks: {
             source: 'auto' as const,
             maxRotation: 0,
             autoSkip: true,
+            color: 'var(--text-muted)',
+          },
+        },
+        y: {
+          grid: {
+            color: 'var(--chart-grid)',
+          },
+          ticks: {
+            color: 'var(--text-muted)',
           },
         },
       },

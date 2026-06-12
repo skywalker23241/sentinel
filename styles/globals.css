@@ -12,16 +12,18 @@
 
 :root {
   /* Surfaces (light values; dark values via light-dark below) */
-  --surface-page: light-dark(#ffffff, var(--mantine-color-dark-7));
-  --surface-card: light-dark(#ffffff, var(--mantine-color-dark-6));
-  --surface-card-border: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
-  --surface-muted: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5));
-  --surface-overlay: light-dark(rgba(255, 255, 255, 0.78), rgba(20, 21, 23, 0.78));
+  --surface-page: light-dark(#f4f7fb, #070a0f);
+  --surface-card: light-dark(#ffffff, #111821);
+  --surface-card-border: light-dark(#dfe7ef, #202a36);
+  --surface-muted: light-dark(#f7f9fc, #0c1219);
+  --surface-overlay: light-dark(rgba(255, 255, 255, 0.86), rgba(13, 18, 25, 0.86));
+  --surface-header: light-dark(rgba(255, 255, 255, 0.92), rgba(17, 24, 33, 0.92));
 
   /* Text */
-  --text-primary: light-dark(var(--mantine-color-gray-9), var(--mantine-color-gray-0));
-  --text-secondary: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
-  --text-muted: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
+  --text-primary: light-dark(#172033, #edf5ff);
+  --text-secondary: light-dark(#3e4b5f, #c8d2e1);
+  --text-muted: light-dark(#66758b, #8d9aae);
+  --chart-grid: light-dark(rgba(40, 51, 70, 0.12), rgba(180, 195, 215, 0.11));
 
   /* Status semantic colors.
    *
@@ -54,23 +56,23 @@
 
   /* Elevation */
   --shadow-card: light-dark(
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 1px 2px rgba(0, 0, 0, 0.45)
+    0 10px 30px -24px rgba(20, 30, 45, 0.5),
+    0 18px 45px -34px rgba(0, 0, 0, 0.82)
   );
   --shadow-card-hover: light-dark(
-    0 6px 18px -8px rgba(15, 23, 42, 0.18),
-    0 6px 18px -8px rgba(0, 0, 0, 0.6)
+    0 16px 34px -22px rgba(20, 30, 45, 0.45),
+    0 20px 48px -32px rgba(0, 0, 0, 0.9)
   );
 
   /* Geometry */
-  --radius-card: 12px;
+  --radius-card: 8px;
   --radius-pill: 9999px;
   --content-max-width: clamp(320px, 92vw, 1440px);
 
   /* DetailBar tunables (consumed by DetailBar.module.css) */
-  --bar-height: 22px;
-  --bar-width: 7px;
-  --bar-gap: 1px;
+  --bar-height: 26px;
+  --bar-width: 8px;
+  --bar-gap: 2px;
 }
 
 @media (max-width: 36em) {
@@ -86,6 +88,16 @@ body {
   color: var(--text-primary);
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   text-rendering: optimizeLegibility;
+  margin: 0;
+  min-width: 320px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
 }
 
 /* Reduced motion respects user preference */

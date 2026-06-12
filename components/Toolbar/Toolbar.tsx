@@ -4,6 +4,8 @@ import type { TimeRange, ViewMode } from '@/hooks/useViewPreferences'
 import classes from '@/styles/Toolbar.module.css'
 
 export default function Toolbar({
+  layout = 'default',
+  showViewMode = true,
   search,
   onSearchChange,
   viewMode,
@@ -14,6 +16,8 @@ export default function Toolbar({
   isRefreshing,
   lastFetchedAgo,
 }: {
+  layout?: 'default' | 'sidebar'
+  showViewMode?: boolean
   search: string
   onSearchChange: (q: string) => void
   viewMode: ViewMode
@@ -25,7 +29,12 @@ export default function Toolbar({
   lastFetchedAgo?: string
 }) {
   return (
-    <div className={classes.toolbar} role="toolbar" aria-label="Dashboard controls">
+    <div
+      className={classes.toolbar}
+      data-layout={layout}
+      role="toolbar"
+      aria-label="Dashboard controls"
+    >
       <TextInput
         className={classes.search}
         placeholder="Search monitors..."
@@ -60,19 +69,21 @@ export default function Toolbar({
             { value: '30d', label: 'Last 30d' },
             { value: '90d', label: 'Last 90d' },
           ]}
-          style={{ width: 130 }}
+          style={{ width: layout === 'sidebar' ? '100%' : 130 }}
         />
 
-        <SegmentedControl
-          size="sm"
-          value={viewMode}
-          onChange={(v) => onViewModeChange(v as ViewMode)}
-          data={[
-            { value: 'compact', label: 'Compact' },
-            { value: 'standard', label: 'Standard' },
-            { value: 'detailed', label: 'Detailed' },
-          ]}
-        />
+        {showViewMode && (
+          <SegmentedControl
+            size="sm"
+            value={viewMode}
+            onChange={(v) => onViewModeChange(v as ViewMode)}
+            data={[
+              { value: 'compact', label: 'Compact' },
+              { value: 'standard', label: 'Standard' },
+              { value: 'detailed', label: 'Detailed' },
+            ]}
+          />
+        )}
 
         {onRefresh && (
           <span className={classes.refreshGroup}>

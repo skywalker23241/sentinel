@@ -7,6 +7,14 @@ import MaintenanceAlert from '@/components/MaintenanceAlert'
 import { getDashboardKpis } from '@/util/uptime'
 import classes from '@/styles/StatusHero.module.css'
 
+const overallLabelByTone: Record<StatusIconTone, string> = {
+  up: 'Up',
+  down: 'Down',
+  degraded: 'Degraded',
+  maintenance: 'Maintenance',
+  unknown: 'Unknown',
+}
+
 function formatUptime(percent: number | null): string {
   if (percent === null || !Number.isFinite(percent)) return '—'
   if (percent >= 99.99) return percent.toFixed(3) + '%'
@@ -68,6 +76,8 @@ export default function StatusHero({
     else statusString = `Some systems not operational (${downCount} of ${monitors.length})`
   }
 
+  const overallLabel = overallLabelByTone[overallTone]
+
   // Maintenance partitioning (mirrors OverallStatus.tsx logic).
   const nowDate = new Date(now * 1000)
   const expandMonitors = (m: MaintenanceConfig) => ({
@@ -93,7 +103,7 @@ export default function StatusHero({
   return (
     <section className={classes.hero} aria-label="Service status overview">
       <div className={classes.heroBanner}>
-        <StatusIcon tone={overallTone} size="xl" marginRight={0} />
+        <StatusIcon tone={overallTone} size="lg" marginRight={0} />
         <div className={classes.statusTextRow}>
           <h1 className={classes.statusHeading}>{statusString}</h1>
           <div className={classes.lastUpdated}>
@@ -117,6 +127,9 @@ export default function StatusHero({
             </div>
           )}
         </div>
+        <span className={classes.statusBadge} data-tone={overallTone}>
+          {overallLabel}
+        </span>
       </div>
 
       <div className={classes.kpiGrid}>

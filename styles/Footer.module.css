@@ -1,5 +1,6 @@
 .footer {
-  margin-top: var(--mantine-spacing-lg);
+  margin-top: 0;
+  padding: 0 clamp(12px, 2vw, 24px) var(--mantine-spacing-md);
 }
 
 .text {
@@ -10,7 +11,7 @@
 }
 
 .text a {
-  color: var(--mantine-color-blue-5);
+  color: var(--mantine-color-blue-4);
   text-decoration: none;
 }
 

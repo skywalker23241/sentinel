@@ -1,4 +1,5 @@
 import { Container, Group, Text } from '@mantine/core'
+import { IconActivityHeartbeat } from '@tabler/icons-react'
 import classes from '@/styles/Header.module.css'
 import { pageConfig } from '@/uptime.config'
 import { PageConfigLink } from '@/types/config'
@@ -19,26 +20,24 @@ export default function Header({ style }: { style?: React.CSSProperties }) {
   }
 
   const links = [{ label: 'Incident History', link: '/incidents' }, ...(pageConfig.links || [])]
+  const isHome = typeof location !== 'undefined' && location.pathname === '/'
+  const brandHref = isHome ? 'https://github.com/lyc8503/UptimeFlare' : '/'
 
   return (
     <header className={classes.header} style={style}>
       <Container size="xl" className={classes.inner}>
         <div>
           <a
-            href={location.pathname == '/' ? 'https://github.com/lyc8503/UptimeFlare' : '/'}
-            target={location.pathname == '/' ? '_blank' : undefined}
+            href={brandHref}
+            target={isHome ? '_blank' : undefined}
+            rel={isHome ? 'noreferrer' : undefined}
+            className={classes.brand}
           >
-            <Text size="xl" span>
-              🕒
-            </Text>
-            <Text
-              size="xl"
-              span
-              fw={700}
-              variant="gradient"
-              gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
-            >
-              UptimeFlare
+            <span className={classes.brandMark}>
+              <IconActivityHeartbeat size={20} stroke={2.3} />
+            </span>
+            <Text size="lg" span fw={800} className={classes.brandText}>
+              {pageConfig.title || 'UptimeFlare'}
             </Text>
           </a>
         </div>

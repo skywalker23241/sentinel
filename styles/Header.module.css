@@ -1,33 +1,77 @@
 .header {
-  height: rem(56px);
-  margin-bottom: rem(24px);
-  background-color: var(--mantine-color-body);
-  border-bottom: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: rem(64px);
+  margin-bottom: 0;
+  background-color: var(--surface-header);
+  border-bottom: rem(1px) solid var(--surface-card-border);
+  backdrop-filter: saturate(140%) blur(14px);
 }
 
 .inner {
-  height: rem(56px);
+  height: rem(64px);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.link {
-  display: block;
-  line-height: 1;
-  padding: rem(8px) rem(12px);
-  border-radius: var(--mantine-radius-sm);
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--text-primary);
   text-decoration: none;
-  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+}
+
+.brandMark {
+  width: 36px;
+  height: 36px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  color: light-dark(#047857, #062e1a);
+  background: var(--status-up-vivid);
+  box-shadow: 0 0 0 5px light-dark(rgba(20, 184, 166, 0.12), rgba(74, 222, 128, 0.12));
+}
+
+.brandText {
+  max-width: min(46vw, 360px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  line-height: 1;
+  padding: rem(8px) rem(13px);
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  color: var(--text-secondary);
   font-size: var(--mantine-font-size-sm);
-  font-weight: 500;
+  font-weight: 700;
 
   @mixin hover {
-    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+    background-color: var(--surface-muted);
   }
 
   [data-mantine-color-scheme] &[data-active] {
-    background-color: var(--mantine-color-blue-filled);
-    color: var(--mantine-color-white);
+    background-color: var(--status-up-vivid);
+    color: light-dark(#064e3b, #052e1a);
+  }
+}
+
+@media (max-width: 36em) {
+  .brandText {
+    max-width: 48vw;
+  }
+
+  .link {
+    min-height: 32px;
+    padding-inline: rem(10px);
   }
 }

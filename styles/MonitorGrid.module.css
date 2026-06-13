@@ -11,6 +11,13 @@
   padding-inline: 0;
 }
 
+/* panel: fills the dashboard content column (overview view) */
+.wrapper[data-layout='panel'] {
+  max-width: none;
+  margin: 0;
+  padding-inline: 0;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));

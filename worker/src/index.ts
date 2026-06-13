@@ -77,15 +77,10 @@ const Worker = {
     state.overallDown = 0
     state.overallUp = 0
 
-    let statusChanged = false
-    const currentTimeSecond = Math.round(Date.now() / 1000)
-
-    // Check each monitor
-    // TODO: concurrent status check
-    for (const monitor of workerConfig.monitors) {
+    // Check a single monitor, either via a check proxy or from the current location
+    const checkMonitor = async (monitor: MonitorTarget) => {
       console.log(`[${workerLocation}] Checking ${monitor.name}...`)
 
-      let monitorStatusChanged = false
       let checkLocation = workerLocation
       let status
 
@@ -132,8 +127,44 @@ const Worker = {
         status = await getStatus(monitor)
       }
 
-      // const status = await getStatus(monitor)
-      const currentTimeSecond = Math.round(Date.now() / 1000)
+      return { checkLocation, status }
+    }
+
+    // Re-check before marking a monitor as down, to avoid false alarms caused by transient errors
+    const checkMonitorWithRetries = async (monitor: MonitorTarget) => {
+      const retries = monitor.checkRetries ?? 1
+      let result = await checkMonitor(monitor)
+      for (let attempt = 1; !result.status.up && attempt <= retries; attempt++) {
+        console.log(
+          `[${workerLocation}] ${monitor.name} check failed (${result.status.err}), retrying (${attempt}/${retries})...`
+        )
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        result = await checkMonitor(monitor)
+      }
+      return result
+    }
+
+    // Check all monitors concurrently
+    const checkResults = await Promise.all(
+      workerConfig.monitors.map((monitor) =>
+        checkMonitorWithRetries(monitor).catch((err) => {
+          console.log(`Unexpected error checking ${monitor.name}: ${err}`)
+          return {
+            checkLocation: workerLocation,
+            status: { ping: 0, up: false, err: `Unexpected error: ${err}` },
+          }
+        })
+      )
+    )
+
+    let statusChanged = false
+    const currentTimeSecond = Math.round(Date.now() / 1000)
+
+    // Process check results and update state sequentially
+    for (let i = 0; i < workerConfig.monitors.length; i++) {
+      const monitor = workerConfig.monitors[i]
+      const { checkLocation, status } = checkResults[i]
+      let monitorStatusChanged = false
 
       // Update counters
       status.up ? state.overallUp++ : state.overallDown++

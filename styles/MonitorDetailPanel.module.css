@@ -29,6 +29,33 @@
   background-repeat: no-repeat;
 }
 
+.backButton {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 5px 10px;
+  border: 1px solid var(--surface-card-border-strong);
+  border-radius: 3px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-family: var(--font-stack-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.backButton:hover {
+  color: var(--accent);
+  background: var(--accent-faint);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
 .panelHeader {
   display: flex;
   align-items: flex-start;

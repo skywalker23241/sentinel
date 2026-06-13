@@ -37,6 +37,7 @@ export type MonitorTarget = {
   hideLatencyChart?: boolean
   expectedCodes?: number[]
   timeout?: number
+  checkRetries?: number // 判定为 down 前的重试次数，默认 1，设为 0 关闭重试
   headers?: { [key: string]: string | number }
   body?: string
   responseKeyword?: string

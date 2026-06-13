@@ -63,7 +63,7 @@ const workerConfig: WorkerConfig = {
       id: 'restcal_site-monitor',
       name: 'RestCal-休历',
       method: 'GET',
-      target: 'https://playvalorant.qzz.io/',
+      target: 'https://abo.qzz.io/restcal/',
       tooltip: 'RestCal站运行情况',
       statusPageLink: 'https://abo.qzz.io/restcal/',
       timeout: 10000,

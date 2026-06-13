@@ -1,5 +1,5 @@
 import { Anchor, ScrollArea, Text } from '@mantine/core'
-import { IconExternalLink } from '@tabler/icons-react'
+import { IconArrowLeft, IconExternalLink } from '@tabler/icons-react'
 import type { MonitorState, MonitorTarget } from '@/types/config'
 import StatusIcon, { type StatusIconTone } from '@/components/StatusIcon'
 import DetailBar from '@/components/DetailBar'
@@ -56,10 +56,12 @@ export default function MonitorDetailPanel({
   monitor,
   state,
   timeRange,
+  onBack,
 }: {
   monitor: MonitorTarget | null
   state: MonitorState
   timeRange: TimeRange
+  onBack?: () => void
 }) {
   if (!monitor) {
     return (
@@ -83,6 +85,13 @@ export default function MonitorDetailPanel({
 
   return (
     <section className={classes.panel} aria-label={`${monitor.name} details`}>
+      {onBack && (
+        <button type="button" className={classes.backButton} onClick={onBack}>
+          <IconArrowLeft size={14} />
+          Back to overview
+        </button>
+      )}
+
       <header className={classes.panelHeader}>
         <div className={classes.titleGroup}>
           <StatusIcon tone={tone} size="lg" marginRight={0} />

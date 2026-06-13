@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import { Center, Text } from '@mantine/core'
+import { IconLayoutDashboard } from '@tabler/icons-react'
 
 import type { MonitorState, MonitorTarget } from '@/types/config'
 import type { KVNamespace } from '@cloudflare/workers-types'
@@ -75,25 +76,19 @@ function Dashboard({
     { enabled: prefs.autoRefresh }
   )
 
-  // Selected monitor for detail modal (replaces URL hash drill-down)
-  const [selected, setSelected] = useState<MonitorTarget | null>(
-    () => initialMonitors[0] ?? null
-  )
+  // Selected monitor for the detail panel; null shows the all-monitors overview
+  const [selected, setSelected] = useState<MonitorTarget | null>(null)
 
   useEffect(() => {
-    if (monitors.length === 0) {
+    // Fall back to the overview if the selected monitor disappears
+    if (selected && !monitors.some((monitor) => monitor.id === selected.id)) {
       setSelected(null)
-      return
-    }
-
-    if (!selected || !monitors.some((monitor) => monitor.id === selected.id)) {
-      setSelected(monitors[0])
     }
   }, [monitors, selected])
 
   const selectedMonitor = selected
-    ? monitors.find((monitor) => monitor.id === selected.id) ?? selected
-    : monitors[0] ?? null
+    ? monitors.find((monitor) => monitor.id === selected.id) ?? null
+    : null
 
   // URL hash one-shot drill-down (kept for iframe / deep-link compatibility)
   const hashMonitorId =
@@ -161,6 +156,17 @@ function Dashboard({
                 lastFetchedAgo={relativeTime(lastFetched)}
               />
 
+              <button
+                type="button"
+                className={classes.overviewButton}
+                data-active={selectedMonitor ? undefined : 'true'}
+                onClick={() => setSelected(null)}
+              >
+                <IconLayoutDashboard size={16} />
+                <span>Overview</span>
+                <span className={classes.overviewHint}>all monitors</span>
+              </button>
+
               <div className={classes.sidebarList}>
                 <MonitorGrid
                   layout="sidebar"
@@ -183,11 +189,30 @@ function Dashboard({
 
             <section className={classes.contentPanel} aria-label="Monitor details">
               <StatusHero state={state} monitors={monitors} maintenances={maintenances} />
-              <MonitorDetailPanel
-                monitor={selectedMonitor}
-                state={state}
-                timeRange={prefs.timeRange}
-              />
+              {selectedMonitor ? (
+                <MonitorDetailPanel
+                  monitor={selectedMonitor}
+                  state={state}
+                  timeRange={prefs.timeRange}
+                  onBack={() => setSelected(null)}
+                />
+              ) : (
+                <MonitorGrid
+                  layout="panel"
+                  monitors={monitors}
+                  state={state}
+                  search={prefs.search}
+                  viewMode={prefs.viewMode}
+                  timeRange={prefs.timeRange}
+                  expandedGroups={
+                    prefs.expandedGroups.length === 0
+                      ? Object.keys(pageConfig.group ?? {})
+                      : prefs.expandedGroups
+                  }
+                  onExpandedGroupsChange={(g) => setPrefs({ expandedGroups: g })}
+                  onSelect={(m) => setSelected(m)}
+                />
+              )}
             </section>
           </div>
         </main>

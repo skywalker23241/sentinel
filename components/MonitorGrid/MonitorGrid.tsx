@@ -36,7 +36,7 @@ export default function MonitorGrid({
   onExpandedGroupsChange,
   onSelect,
 }: {
-  layout?: 'cards' | 'sidebar'
+  layout?: 'cards' | 'sidebar' | 'panel'
   monitors: MonitorTarget[]
   state: MonitorState
   search: string

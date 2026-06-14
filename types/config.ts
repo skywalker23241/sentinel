@@ -108,11 +108,13 @@ export type MonitorState = {
         loc: string
         ping: number
         time: number
+        up?: boolean
       }[] // recent 12 hour data, 2 min interval
       all: {
         loc: string
         ping: number
         time: number
+        up?: boolean
       }[] // all data in 90 days, 1 hour interval
     }
   >

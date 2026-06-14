@@ -313,6 +313,7 @@ const Worker = {
         loc: checkLocation,
         ping: status.ping,
         time: currentTimeSecond,
+        up: status.up,
       }
       latencyLists.recent.push(record)
 

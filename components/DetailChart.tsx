@@ -70,7 +70,8 @@ export default function DetailChart({
     const useRecent = timeRange === '24h'
     const latency = state.latency[monitor.id]
     const preferredSeries = useRecent ? latency?.recent : latency?.all
-    const series = preferredSeries && preferredSeries.length > 0 ? preferredSeries : latency?.recent
+    const series =
+      preferredSeries && preferredSeries.length >= 2 ? preferredSeries : latency?.recent
     if (!series) return { datasets: [] }
 
     const cutoff = Date.now() / 1000 - timeRangeToSeconds(timeRange)
@@ -86,7 +87,7 @@ export default function DetailChart({
           backgroundColor: verticalGradient,
           fill: true,
           borderWidth: 1.3,
-          radius: 0,
+          radius: filtered.length <= 1 ? 2 : 0,
           hoverRadius: 3,
           pointBackgroundColor: HUD.line,
           cubicInterpolationMode: 'monotone' as const,

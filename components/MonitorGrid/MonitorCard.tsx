@@ -4,7 +4,11 @@ import { Tooltip } from '@mantine/core'
 import StatusIcon, { type StatusIconTone } from '@/components/StatusIcon'
 import DetailBar from '@/components/DetailBar'
 import DetailChart from '@/components/DetailChart'
-import { getMonitorAvgLatency, getMonitorUptimePercent, isMonitorDown } from '@/util/uptime'
+import {
+  getMonitorAvgLatency,
+  getMonitorRecentSampleUptimePercent,
+  isMonitorDown,
+} from '@/util/uptime'
 import { getStatusTone } from '@/util/color'
 import { maintenances as configuredMaintenances } from '@/uptime.config'
 import type { ViewMode, TimeRange } from '@/hooks/useViewPreferences'
@@ -53,7 +57,7 @@ export default function MonitorCard({
 }) {
   const tone = resolveTone(state, monitor)
   const hasData = !!state.latency[monitor.id]
-  const uptimePercent = hasData ? getMonitorUptimePercent(state, monitor.id) : null
+  const uptimePercent = hasData ? getMonitorRecentSampleUptimePercent(state, monitor.id) : null
   const avgLatency = hasData ? getMonitorAvgLatency(state, monitor.id) : null
 
   const uptimeStr = uptimePercent !== null ? uptimePercent.toFixed(2) : '—'
@@ -129,12 +133,7 @@ export default function MonitorCard({
         </div>
       ) : viewMode === 'compact' ? (
         <div className={classes.compactBody}>
-          <DetailBar
-            monitor={monitor}
-            state={state}
-            timeRange={timeRange}
-            variant="mini"
-          />
+          <DetailBar monitor={monitor} state={state} timeRange={timeRange} variant="mini" />
           {avgLatency !== null && (
             <span className={classes.compactStat}>{Math.round(avgLatency)} ms avg</span>
           )}
@@ -147,9 +146,7 @@ export default function MonitorCard({
           )}
           {avgLatency !== null && (
             <div className={classes.metaRow}>
-              <span className={classes.metaItem}>
-                Avg latency: {Math.round(avgLatency)} ms
-              </span>
+              <span className={classes.metaItem}>Avg latency: {Math.round(avgLatency)} ms</span>
             </div>
           )}
         </div>

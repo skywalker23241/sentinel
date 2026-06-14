@@ -5,7 +5,7 @@ import { useResizeObserver } from '@mantine/hooks'
 import { useState, useMemo } from 'react'
 import type { TimeRange } from '@/hooks/useViewPreferences'
 import { timeRangeToDays } from '@/hooks/useViewPreferences'
-import { pickBarDayCount } from '@/util/uptime'
+import { getMonitorIncidentAt, pickBarDayCount } from '@/util/uptime'
 import classes from '@/styles/DetailBar.module.css'
 
 const moment = require('moment')
@@ -32,6 +32,7 @@ export default function DetailBar({
   }
 
   const totalDays = timeRangeToDays(timeRange)
+  const recentLatency = state.latency[monitor.id]?.recent ?? []
 
   // Decide how many days to actually render: bounded by both the user's
   // chosen range AND the available container width. This replaces the
@@ -41,31 +42,27 @@ export default function DetailBar({
     return Math.min(totalDays, pickBarDayCount(barRect.width, totalDays))
   }, [barRect.width, totalDays])
 
+  const recentSampleCount = useMemo(() => {
+    if (recentLatency.length === 0) return 0
+    if (barRect.width === 0) return recentLatency.length
+    return pickBarDayCount(barRect.width, recentLatency.length)
+  }, [barRect.width, recentLatency.length])
+
   const uptimePercentBars = []
 
   const currentTime = Math.round(Date.now() / 1000)
   const monitorIncidents = state.incident[monitor.id] ?? []
-  const recentLatency = state.latency[monitor.id]?.recent ?? []
   const monitorStartTime = monitorIncidents[0]?.start?.[0] ?? currentTime - totalDays * 86400
 
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
 
-  const getIncidentAt = (time: number) => {
-    return monitorIncidents.find((incident) => {
-      if (incident.error[0] === 'dummy') return false
-      const incidentStart = incident.start[0]
-      const incidentEnd = incident.end ?? currentTime
-      return time >= incidentStart && time < incidentEnd
-    })
-  }
-
-  const recentSamples = [...recentLatency].sort((a, b) => a.time - b.time).slice(-dayCount)
+  const recentSamples = [...recentLatency].sort((a, b) => a.time - b.time).slice(-recentSampleCount)
 
   if (recentSamples.length > 0) {
     for (let index = 0; index < recentSamples.length; index++) {
       const sample = recentSamples[index]
-      const incident = getIncidentAt(sample.time)
+      const incident = getMonitorIncidentAt(state, monitor.id, sample.time)
       const isUp = sample.up ?? !incident
       const statusLabel = isUp ? 'UP' : 'DOWN'
       const barColor = isUp ? getColor(100, false) : getColor(0, false)

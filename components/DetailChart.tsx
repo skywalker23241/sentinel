@@ -68,7 +68,9 @@ export default function DetailChart({
     // Short ranges use the high-resolution `recent` series; longer ranges
     // use the hourly `all` series so charts stay readable.
     const useRecent = timeRange === '24h'
-    const series = useRecent ? state.latency[monitor.id]?.recent : state.latency[monitor.id]?.all
+    const latency = state.latency[monitor.id]
+    const preferredSeries = useRecent ? latency?.recent : latency?.all
+    const series = preferredSeries && preferredSeries.length > 0 ? preferredSeries : latency?.recent
     if (!series) return { datasets: [] }
 
     const cutoff = Date.now() / 1000 - timeRangeToSeconds(timeRange)

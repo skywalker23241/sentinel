@@ -25,10 +25,15 @@
 }
 
 .inner {
+  width: 100%;
+  max-width: min(100%, 1500px);
   height: rem(60px);
+  margin-inline: auto;
+  padding-inline: clamp(12px, 2vw, 24px);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: clamp(16px, 3vw, 40px);
 }
 
 .brand {
@@ -36,6 +41,7 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
+  flex: 1 1 auto;
   color: var(--text-primary);
   text-decoration: none;
 }
@@ -110,6 +116,11 @@
 @media (max-width: 36em) {
   .brandText {
     max-width: 48vw;
+  }
+
+  .inner {
+    padding-inline: 10px;
+    gap: 10px;
   }
 
   .link {

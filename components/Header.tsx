@@ -1,4 +1,4 @@
-import { Container, Group, Text } from '@mantine/core'
+import { Group, Text } from '@mantine/core'
 import { IconActivityHeartbeat } from '@tabler/icons-react'
 import classes from '@/styles/Header.module.css'
 import { pageConfig } from '@/uptime.config'
@@ -25,7 +25,7 @@ export default function Header({ style }: { style?: React.CSSProperties }) {
 
   return (
     <header className={classes.header} style={style}>
-      <Container size="xl" className={classes.inner}>
+      <div className={classes.inner}>
         <div>
           <a
             href={brandHref}
@@ -49,7 +49,7 @@ export default function Header({ style }: { style?: React.CSSProperties }) {
         <Group gap={5} hiddenFrom="sm">
           {links?.filter((link) => link.highlight || link.link.startsWith('/')).map(linkToElement)}
         </Group>
-      </Container>
+      </div>
     </header>
   )
 }

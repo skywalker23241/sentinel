@@ -8,9 +8,9 @@ const pageConfig: PageConfig = {
   // 顶部导航链接
   links: [
     { link: 'https://jackcooper.qzz.io/', label: 'Blog', highlight: true },
-    { link: 'https://github.com/skywalker23241', label: 'Github' },
-    { link: 'https://www.hopp.bio/junbo-le/', label: 'Social' },
-    { link: 'https://www.abo.qzz.io/', label: 'Resume' },
+    { link: 'https://github.com/skywalker23241', label: 'Github', highlight: true },
+    { link: 'https://www.hopp.bio/junbo-le/', label: 'Social', highlight: true },
+    { link: 'https://www.abo.qzz.io/', label: 'Resume', highlight: true },
   ],
 
   // 分组展示（可选）

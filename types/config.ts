@@ -21,6 +21,8 @@ export type MaintenanceConfig = {
 
 export type PageConfigGroup = { [key: string]: string[] }
 
+export type IncidentSeverity = 'outage' | 'degraded' | 'maintenance' | 'false_positive'
+
 export type PageConfigLink = {
   link: string
   label: string
@@ -98,6 +100,10 @@ export type MonitorState = {
       start: number[]
       end: number | undefined // undefined if it's still open
       error: string[]
+      // Optional classification. Defaults to 'outage' when absent.
+      // 'maintenance' and 'false_positive' are excluded from SLA/uptime math.
+      severity?: IncidentSeverity
+      title?: string
     }[]
   >
 

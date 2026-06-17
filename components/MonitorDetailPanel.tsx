@@ -1,12 +1,14 @@
 import { Anchor, ScrollArea, Text } from '@mantine/core'
 import { IconArrowLeft, IconExternalLink } from '@tabler/icons-react'
-import type { MonitorState, MonitorTarget } from '@/types/config'
+import type { MonitorState, MonitorTarget, IncidentSeverity } from '@/types/config'
 import StatusIcon, { type StatusIconTone } from '@/components/StatusIcon'
 import DetailBar from '@/components/DetailBar'
 import DetailChart from '@/components/DetailChart'
+import LatencyStats from '@/components/LatencyStats'
 import { getMonitorAvgLatency, getMonitorUptimePercent, isMonitorDown } from '@/util/uptime'
 import { maintenances as configuredMaintenances } from '@/uptime.config'
 import type { TimeRange } from '@/hooks/useViewPreferences'
+import { timeRangeToSeconds } from '@/hooks/useViewPreferences'
 import classes from '@/styles/MonitorDetailPanel.module.css'
 
 const toneLabel: Record<StatusIconTone, string> = {
@@ -15,6 +17,13 @@ const toneLabel: Record<StatusIconTone, string> = {
   degraded: 'Degraded',
   maintenance: 'Maintenance',
   unknown: 'Unknown',
+}
+
+const severityLabel: Record<IncidentSeverity, string> = {
+  outage: 'Outage',
+  degraded: 'Degraded',
+  maintenance: 'Maintenance',
+  false_positive: 'False positive',
 }
 
 function resolveTone(state: MonitorState, monitor: MonitorTarget): StatusIconTone {
@@ -78,10 +87,17 @@ export default function MonitorDetailPanel({
 
   const tone = resolveTone(state, monitor)
   const hasData = !!state.latency[monitor.id]
-  const uptime = hasData ? getMonitorUptimePercent(state, monitor.id) : null
+  const uptime = hasData
+    ? getMonitorUptimePercent(state, monitor.id, timeRangeToSeconds(timeRange))
+    : null
   const avgLatency = hasData ? getMonitorAvgLatency(state, monitor.id) : null
   const currentLatency = hasData ? getCurrentLatency(state, monitor.id) : null
-  const incidents = (state.incident[monitor.id] || []).slice().reverse().slice(0, 10)
+  // Drop the worker's seeded 'dummy' placeholder so it never counts or shows.
+  const incidents = (state.incident[monitor.id] || [])
+    .filter((i) => i.error?.[0] !== 'dummy')
+    .slice()
+    .reverse()
+    .slice(0, 10)
 
   return (
     <section className={classes.panel} aria-label={`${monitor.name} details`}>
@@ -157,8 +173,9 @@ export default function MonitorDetailPanel({
             <div className={classes.sectionBlock}>
               <div className={classes.sectionHeader}>
                 <h3>Response time</h3>
-                <span>ms</span>
+                <span>{timeRange.toUpperCase()}</span>
               </div>
+              <LatencyStats monitor={monitor} state={state} timeRange={timeRange} />
               <DetailChart monitor={monitor} state={state} timeRange={timeRange} />
             </div>
           )}
@@ -187,13 +204,21 @@ export default function MonitorDetailPanel({
                 const start = formatIncidentTime(incident.start[0])
                 const end = incident.end ? formatIncidentTime(incident.end) : 'ongoing'
                 const reason = incident.error[incident.error.length - 1] ?? '--'
+                const severity: IncidentSeverity = incident.severity ?? 'outage'
                 return (
-                  <div className={classes.incidentItem} key={`${incident.start[0]}-${index}`}>
+                  <div
+                    className={classes.incidentItem}
+                    data-severity={severity}
+                    key={`${incident.start[0]}-${index}`}
+                  >
                     <div>
                       <strong>
                         {start}
                         {' -> '}
                         {end}
+                        <span className={classes.severityTag} data-severity={severity}>
+                          {severityLabel[severity]}
+                        </span>
                       </strong>
                       <span>{reason}</span>
                     </div>

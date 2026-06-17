@@ -68,7 +68,7 @@ function formatStatusChangeNotification(
 
 function templateWebhookPlayload(payload: any, message: string) {
   for (const key in payload) {
-    if (Object.prototype.hasOwnProperty.call(payload, key)) {      
+    if (Object.prototype.hasOwnProperty.call(payload, key)) {
       if (payload[key] === '$MSG') {
         payload[key] = message
       } else if (typeof payload[key] === 'object' && payload[key] !== null) {
@@ -78,15 +78,48 @@ function templateWebhookPlayload(payload: any, message: string) {
   }
 }
 
-async function webhookNotify(webhook: WebhookConfig, message: string) {
-  console.log(
-    'Sending webhook notification: ' + JSON.stringify(message) + ' to webhook ' + webhook.url
-  )
+/**
+ * Replace `${VAR}` placeholders in any string within a value using Cloudflare
+ * Worker env (secrets/vars). Lets secrets (e.g. Telegram bot token, chat id)
+ * live in env bindings instead of the committed uptime.config.ts.
+ */
+function interpolateSecrets<T>(value: T, env: Record<string, unknown>): T {
+  if (typeof value === 'string') {
+    return value.replace(/\$\{([A-Z0-9_]+)\}/g, (_, name: string) => {
+      const v = env[name]
+      return v === undefined || v === null ? '' : String(v)
+    }) as unknown as T
+  }
+  if (Array.isArray(value)) {
+    return value.map((v) => interpolateSecrets(v, env)) as unknown as T
+  }
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = interpolateSecrets(v, env)
+    }
+    return out as unknown as T
+  }
+  return value
+}
+
+async function webhookNotify(
+  webhook: WebhookConfig,
+  message: string,
+  env: Record<string, unknown> = {}
+) {
+  // Resolve any ${ENV_VAR} placeholders (e.g. bot token, chat id) from env
+  // before doing anything else — never log the raw secret-bearing URL.
+  const url0 = interpolateSecrets(webhook.url, env)
+  console.log('Sending webhook notification: ' + JSON.stringify(message))
   try {
-    let url = webhook.url
+    let url = url0
     let method = webhook.method
-    let headers = new Headers(webhook.headers as any)
-    let payloadTemplated: { [key: string]: string | number } = JSON.parse(JSON.stringify(webhook.payload))
+    let headers = new Headers(interpolateSecrets(webhook.headers ?? {}, env) as any)
+    let payloadTemplated: { [key: string]: string | number } = interpolateSecrets(
+      JSON.parse(JSON.stringify(webhook.payload)),
+      env
+    )
     templateWebhookPlayload(payloadTemplated, message)
     let body = undefined
 
@@ -118,9 +151,10 @@ async function webhookNotify(webhook: WebhookConfig, message: string) {
     }
 
     console.log(
-      `Webhook finalized parameters: ${method} ${url}, headers ${JSON.stringify(
-        Object.fromEntries(headers.entries())
-      )}, body ${JSON.stringify(body)}`
+      `Webhook finalized: ${method} ${url0.replace(
+        /\$\{[A-Z0-9_]+\}|(bot)[^/]+/g,
+        '$1***'
+      )} (host ${new URL(url).host})`
     )
     const resp = await fetchTimeout(url, webhook.timeout ?? 5000, { method, headers, body })
 

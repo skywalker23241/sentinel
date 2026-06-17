@@ -1,22 +1,40 @@
 import type { MonitorState, MonitorTarget } from '@/types/config'
 
 /**
- * Compute the uptime percent for a single monitor across its full incident
- * history. Logic mirrors `MonitorDetail.tsx:57-63` which we now reuse here.
+ * Compute the uptime percent for a single monitor.
+ *
+ * - `windowSec` bounds the measurement window (e.g. 24h / 7d / 30d). When
+ *   omitted it falls back to the full incident history.
+ * - A monitor that HAS probe data but no qualifying downtime reports 100% —
+ *   it is no longer dropped to `null`, which previously biased the dashboard
+ *   average toward only the monitors that had failed.
+ * - `maintenance` / `false_positive` incidents do not count as downtime.
+ *
+ * Returns `null` only when the monitor has no probe data at all (truly unknown).
  */
-export function getMonitorUptimePercent(state: MonitorState, monitorId: string): number | null {
-  const incidents = state.incident[monitorId]
-  if (!incidents || incidents.length === 0) return null
+export function getMonitorUptimePercent(
+  state: MonitorState,
+  monitorId: string,
+  windowSec?: number
+): number | null {
+  if (!state.latency[monitorId]) return null
 
+  const incidents = state.incident[monitorId] ?? []
   const now = Date.now() / 1000
-  const totalTime = now - incidents[0].start[0]
-  if (totalTime <= 0) return null
+  const from = windowSec ? now - windowSec : incidents[0]?.start[0] ?? now
+  const totalTime = now - from
+  if (totalTime <= 0) return 100
 
   let downTime = 0
   for (const incident of incidents) {
-    downTime += (incident.end ?? now) - incident.start[0]
+    if (incident.severity === 'maintenance' || incident.severity === 'false_positive') continue
+    // Clip the incident to the measurement window before accumulating.
+    const start = Math.max(incident.start[0], from)
+    const end = Math.min(incident.end ?? now, now)
+    if (end > start) downTime += end - start
   }
-  return ((totalTime - downTime) / totalTime) * 100
+
+  return Math.max(0, ((totalTime - downTime) / totalTime) * 100)
 }
 
 /**
@@ -27,6 +45,64 @@ export function getMonitorAvgLatency(state: MonitorState, monitorId: string): nu
   if (!recent || recent.length === 0) return null
   const total = recent.reduce((acc, p) => acc + p.ping, 0)
   return total / recent.length
+}
+
+export type LatencyStats = {
+  avg: number
+  p50: number
+  p95: number
+  p99: number
+  max: number
+  min: number
+  count: number
+}
+
+/**
+ * Latency distribution (avg / p50 / p95 / p99 / max / min) over a time window.
+ *
+ * Series selection mirrors DetailChart so the numbers always match the chart a
+ * user is looking at:
+ *   - `useRecent` (the 24h range) reads the high-resolution `recent` series;
+ *   - longer ranges read the hourly `all` series, falling back to `recent`
+ *     when `all` has too few points.
+ *
+ * Percentiles use the nearest-rank method on ascending-sorted pings.
+ * Returns `null` when there are no samples inside the window.
+ */
+export function getMonitorLatencyStats(
+  state: MonitorState,
+  monitorId: string,
+  windowSec: number,
+  useRecent: boolean
+): LatencyStats | null {
+  const latency = state.latency[monitorId]
+  if (!latency) return null
+
+  const preferred = useRecent ? latency.recent : latency.all
+  const series = preferred && preferred.length >= 2 ? preferred : latency.recent
+  if (!series || series.length === 0) return null
+
+  const cutoff = Date.now() / 1000 - windowSec
+  const pings = series
+    .filter((p) => p.time >= cutoff)
+    .map((p) => p.ping)
+    .sort((a, b) => a - b)
+  if (pings.length === 0) return null
+
+  // nearest-rank: smallest value whose rank ≥ q. Clamped to a valid index.
+  const nearestRank = (q: number) =>
+    pings[Math.min(pings.length - 1, Math.max(0, Math.ceil(q * pings.length) - 1))]
+
+  const sum = pings.reduce((acc, p) => acc + p, 0)
+  return {
+    avg: sum / pings.length,
+    p50: nearestRank(0.5),
+    p95: nearestRank(0.95),
+    p99: nearestRank(0.99),
+    max: pings[pings.length - 1],
+    min: pings[0],
+    count: pings.length,
+  }
 }
 
 export function getMonitorIncidentAt(state: MonitorState, monitorId: string, time: number) {
@@ -80,20 +156,27 @@ export type DashboardKpis = {
   avgUptimePercent: number | null
   avgLatencyMs: number | null
   lastIncidentAt: number | null
+  /** Whether the most recent incident is still open (no end timestamp). */
+  lastIncidentOngoing: boolean
 }
 
-export function getDashboardKpis(state: MonitorState, monitors: MonitorTarget[]): DashboardKpis {
+export function getDashboardKpis(
+  state: MonitorState,
+  monitors: MonitorTarget[],
+  uptimeWindowSec?: number
+): DashboardKpis {
   let operational = 0
   let uptimeSum = 0
   let uptimeCount = 0
   let latencySum = 0
   let latencyCount = 0
   let lastIncidentAt: number | null = null
+  let lastIncidentOngoing = false
 
   for (const m of monitors) {
     if (!isMonitorDown(state, m.id)) operational++
 
-    const up = getMonitorUptimePercent(state, m.id)
+    const up = getMonitorUptimePercent(state, m.id, uptimeWindowSec)
     if (up !== null && Number.isFinite(up)) {
       uptimeSum += up
       uptimeCount++
@@ -107,9 +190,11 @@ export function getDashboardKpis(state: MonitorState, monitors: MonitorTarget[])
 
     const incidents = state.incident[m.id] || []
     for (const incident of incidents) {
+      const ongoing = incident.end === undefined
       const end = incident.end ?? incident.start[incident.start.length - 1]
       if (lastIncidentAt === null || end > lastIncidentAt) {
         lastIncidentAt = end
+        lastIncidentOngoing = ongoing
       }
     }
   }
@@ -120,6 +205,7 @@ export function getDashboardKpis(state: MonitorState, monitors: MonitorTarget[])
     avgUptimePercent: uptimeCount > 0 ? uptimeSum / uptimeCount : null,
     avgLatencyMs: latencyCount > 0 ? latencySum / latencyCount : null,
     lastIncidentAt,
+    lastIncidentOngoing,
   }
 }
 

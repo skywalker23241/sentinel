@@ -1,11 +1,14 @@
 import { Modal, Stack, Text, Group, Badge, Divider, Anchor, ScrollArea } from '@mantine/core'
-import type { MonitorState, MonitorTarget } from '@/types/config'
+import type { MonitorState, MonitorTarget, IncidentSeverity } from '@/types/config'
 import StatusIcon, { type StatusIconTone } from '@/components/StatusIcon'
 import DetailBar from '@/components/DetailBar'
 import DetailChart from '@/components/DetailChart'
+import LatencyStats from '@/components/LatencyStats'
+import { severityMeta } from '@/components/IncidentCard'
 import { getMonitorAvgLatency, getMonitorUptimePercent, isMonitorDown } from '@/util/uptime'
 import { maintenances as configuredMaintenances } from '@/uptime.config'
 import type { TimeRange } from '@/hooks/useViewPreferences'
+import { timeRangeToSeconds } from '@/hooks/useViewPreferences'
 
 function resolveTone(state: MonitorState, monitor: MonitorTarget): StatusIconTone {
   const now = new Date()
@@ -52,10 +55,16 @@ export default function MonitorDetailModal({
 
   const tone = resolveTone(state, monitor)
   const hasData = !!state.latency[monitor.id]
-  const uptime = hasData ? getMonitorUptimePercent(state, monitor.id) : null
+  const uptime = hasData
+    ? getMonitorUptimePercent(state, monitor.id, timeRangeToSeconds(timeRange))
+    : null
   const latency = hasData ? getMonitorAvgLatency(state, monitor.id) : null
 
-  const incidents = (state.incident[monitor.id] || []).slice().reverse().slice(0, 10)
+  const incidents = (state.incident[monitor.id] || [])
+    .filter((i) => i.error?.[0] !== 'dummy')
+    .slice()
+    .reverse()
+    .slice(0, 10)
 
   return (
     <Modal
@@ -73,7 +82,7 @@ export default function MonitorDetailModal({
         <Group gap="xs" wrap="wrap">
           {uptime !== null && (
             <Badge variant="light" size="lg">
-              Uptime: {uptime.toFixed(2)}%
+              Uptime ({timeRange}): {uptime.toFixed(2)}%
             </Badge>
           )}
           {latency !== null && (
@@ -95,7 +104,10 @@ export default function MonitorDetailModal({
           <>
             <DetailBar monitor={monitor} state={state} timeRange={timeRange} />
             {!monitor.hideLatencyChart && (
-              <DetailChart monitor={monitor} state={state} timeRange={timeRange} />
+              <>
+                <LatencyStats monitor={monitor} state={state} timeRange={timeRange} />
+                <DetailChart monitor={monitor} state={state} timeRange={timeRange} />
+              </>
             )}
           </>
         ) : (
@@ -116,11 +128,17 @@ export default function MonitorDetailModal({
                   ? new Date(incident.end * 1000).toLocaleString()
                   : 'ongoing'
                 const reason = incident.error[incident.error.length - 1] ?? '—'
+                const severity: IncidentSeverity = incident.severity ?? 'outage'
                 return (
                   <Stack key={idx} gap={2}>
-                    <Text size="sm" fw={500}>
-                      {start} → {end}
-                    </Text>
+                    <Group gap="xs" wrap="wrap">
+                      <Text size="sm" fw={500}>
+                        {start} → {end}
+                      </Text>
+                      <Badge size="xs" color={severityMeta[severity].color} variant="light">
+                        {severityMeta[severity].label}
+                      </Badge>
+                    </Group>
                     <Text size="xs" c="dimmed">
                       {reason}
                     </Text>

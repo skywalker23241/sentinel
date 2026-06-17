@@ -23,12 +23,17 @@ export default async function handler(req: NextRequest): Promise<Response> {
   let monitors: any = {}
 
   for (let monitor of workerConfig.monitors) {
-    const isUp = state.incident[monitor.id].slice(-1)[0].end !== undefined
+    const incidents = state.incident[monitor.id] ?? []
+    const lastIncident = incidents[incidents.length - 1]
+    const recent = state.latency[monitor.id]?.recent ?? []
+    const lastSample = recent[recent.length - 1]
+    // A monitor is up when it has no open incident.
+    const isUp = !lastIncident || lastIncident.end !== undefined
     monitors[monitor.id] = {
       up: isUp,
-      latency: state.latency[monitor.id].recent.slice(-1)[0].ping,
-      location: state.latency[monitor.id].recent.slice(-1)[0].loc,
-      message: isUp ? 'OK' : state.incident[monitor.id].slice(-1)[0].error.slice(-1)[0],
+      latency: lastSample?.ping ?? null,
+      location: lastSample?.loc ?? null,
+      message: isUp ? 'OK' : lastIncident.error[lastIncident.error.length - 1] ?? 'down',
     }
   }
 

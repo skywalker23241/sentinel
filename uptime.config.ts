@@ -13,12 +13,12 @@ const pageConfig: PageConfig = {
     { link: 'https://www.abo.qzz.io/', label: 'Resume', highlight: true },
   ],
 
-  // 分组展示（可选）
+  // 分组展示（可选）。分组标题为界面文案，统一英文；品牌名与监控项名称保留。
   group: {
-    Abo的博客站: ['main_site_monitor'],
-    RadiantShelf站: ['valorant_site_monitor'],
-    RestCal站: ['restcal_site-monitor'],
-    Resume网页: ['resume-site-monitor'],
+    "Abo's Blog": ['main_site_monitor'],
+    RadiantShelf: ['valorant_site_monitor'],
+    RestCal: ['restcal_site-monitor'],
+    Resume: ['resume-site-monitor'],
   },
 
   // 图标
@@ -84,16 +84,21 @@ const workerConfig: WorkerConfig = {
   ],
 
   // 通知配置
+  // 机密（Telegram bot token / chat id）不要写在本文件里。
+  // 用 Cloudflare 机密注入：
+  //   wrangler secret put TG_BOT_TOKEN
+  //   wrangler secret put TG_CHAT_ID
+  // 下面的 ${...} 占位会在 worker 发送时由 env 替换。
   notification: {
     webhook: {
-      url: 'https://api.telegram.org/bot123456:ABCDEF/sendMessage',
+      url: 'https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage',
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       payloadType: 'x-www-form-urlencoded',
       payload: {
-        chat_id: 12345678,
+        chat_id: '${TG_CHAT_ID}',
         text: '$MSG',
       },
       timeout: 10000,

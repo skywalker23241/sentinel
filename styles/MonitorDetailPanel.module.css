@@ -298,6 +298,52 @@
   border-radius: 0 3px 3px 0;
 }
 
+/* Non-outage severities recolor the frame so a maintenance window or a
+   false positive never reads as a red outage. Outage keeps the default. */
+.incidentItem[data-severity='degraded'] {
+  background: color-mix(in srgb, var(--status-degraded) 12%, transparent);
+  border-left-color: var(--status-degraded);
+}
+
+.incidentItem[data-severity='maintenance'] {
+  background: color-mix(in srgb, var(--status-maintenance) 12%, transparent);
+  border-left-color: var(--status-maintenance);
+}
+
+.incidentItem[data-severity='false_positive'] {
+  background: var(--surface-muted);
+  border-left-color: var(--text-muted);
+}
+
+.incidentItem strong .severityTag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-family: var(--font-stack-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  color: var(--sev-color, var(--status-down));
+  background: color-mix(in srgb, var(--sev-color, var(--status-down)) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sev-color, var(--status-down)) 40%, transparent);
+}
+
+.severityTag[data-severity='outage'] {
+  --sev-color: var(--status-down);
+}
+.severityTag[data-severity='degraded'] {
+  --sev-color: var(--status-degraded);
+}
+.severityTag[data-severity='maintenance'] {
+  --sev-color: var(--status-maintenance);
+}
+.severityTag[data-severity='false_positive'] {
+  --sev-color: var(--text-muted);
+}
+
 .incidentItem strong,
 .incidentItem span {
   display: block;

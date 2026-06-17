@@ -188,7 +188,12 @@ function Dashboard({
             </aside>
 
             <section className={classes.contentPanel} aria-label="Monitor details">
-              <StatusHero state={state} monitors={monitors} maintenances={maintenances} />
+              <StatusHero
+                state={state}
+                monitors={monitors}
+                maintenances={maintenances}
+                timeRange={prefs.timeRange}
+              />
               {selectedMonitor ? (
                 <MonitorDetailPanel
                   monitor={selectedMonitor}

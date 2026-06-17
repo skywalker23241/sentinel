@@ -7,6 +7,10 @@ import { formatStatusChangeNotification, getWorkerLocation, webhookNotify } from
 export interface Env {
   UPTIMEFLARE_STATE: KVNamespace
   REMOTE_CHECKER_DO: DurableObjectNamespace<RemoteChecker>
+  // Notification secrets, referenced as ${TG_BOT_TOKEN} / ${TG_CHAT_ID} in
+  // uptime.config.ts. Set via `wrangler secret put` — never commit real values.
+  TG_BOT_TOKEN?: string
+  TG_CHAT_ID?: string
 }
 
 const Worker = {
@@ -55,7 +59,11 @@ const Worker = {
           reason,
           workerConfig.notification?.timeZone ?? 'Etc/GMT'
         )
-        await webhookNotify(workerConfig.notification.webhook, notification)
+        await webhookNotify(
+          workerConfig.notification.webhook,
+          notification,
+          env as unknown as Record<string, unknown>
+        )
       } else {
         console.log(`Webhook not set, skipping notification for ${monitor.name}`)
       }

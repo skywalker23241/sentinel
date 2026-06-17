@@ -5,6 +5,7 @@ import StatusIcon, { type StatusIconTone } from '@/components/StatusIcon'
 import KpiCard, { type KpiTone } from './KpiCard'
 import MaintenanceAlert from '@/components/MaintenanceAlert'
 import { getDashboardKpis } from '@/util/uptime'
+import { timeRangeToSeconds, type TimeRange } from '@/hooks/useViewPreferences'
 import classes from '@/styles/StatusHero.module.css'
 
 const overallLabelByTone: Record<StatusIconTone, string> = {
@@ -46,19 +47,22 @@ export default function StatusHero({
   state,
   monitors,
   maintenances,
+  timeRange = '90d',
   toolbarSlot,
   refreshSlot,
 }: {
   state: MonitorState
   monitors: MonitorTarget[]
   maintenances: MaintenanceConfig[]
+  /** Window used for the Avg-uptime KPI; keeps number and label in sync. */
+  timeRange?: TimeRange
   /** Optional content slot rendered on the bottom-right (e.g. RefreshButton) */
   refreshSlot?: React.ReactNode
   toolbarSlot?: React.ReactNode
 }) {
   const now = useTickingClock()
 
-  const kpis = getDashboardKpis(state, monitors)
+  const kpis = getDashboardKpis(state, monitors, timeRangeToSeconds(timeRange))
   const downCount = kpis.total - kpis.operational
   const overallTone: StatusIconTone =
     monitors.length === 0
@@ -72,8 +76,8 @@ export default function StatusHero({
   let statusString = 'No data yet'
   if (monitors.length > 0) {
     if (downCount === 0) statusString = 'All systems operational'
-    else if (downCount === monitors.length) statusString = 'All systems not operational'
-    else statusString = `Some systems not operational (${downCount} of ${monitors.length})`
+    else if (downCount === monitors.length) statusString = 'Major outage · all systems down'
+    else statusString = `Partial outage · ${downCount} of ${monitors.length} down`
   }
 
   const overallLabel = overallLabelByTone[overallTone]
@@ -140,15 +144,15 @@ export default function StatusHero({
             kpis.total === 0
               ? 'No monitors configured'
               : downCount === 0
-              ? 'All clear'
-              : `${downCount} down`
+              ? 'all clear right now'
+              : `${downCount} down right now`
           }
           tone={operationalTone as KpiTone}
         />
         <KpiCard
           label="Avg uptime"
           value={formatUptime(kpis.avgUptimePercent)}
-          hint="across all monitors"
+          hint={`last ${timeRange} · all monitors`}
         />
         <KpiCard
           label="Avg latency"
@@ -156,13 +160,20 @@ export default function StatusHero({
           hint="recent 12h window"
         />
         <KpiCard
-          label="Last incident"
+          label={kpis.lastIncidentOngoing ? 'Ongoing incident' : 'Last incident'}
           value={
             kpis.lastIncidentAt
               ? formatRelative(Math.max(0, now - Math.floor(kpis.lastIncidentAt)))
               : '—'
           }
-          hint={kpis.lastIncidentAt ? 'time since last incident' : 'no incidents recorded'}
+          hint={
+            kpis.lastIncidentAt
+              ? kpis.lastIncidentOngoing
+                ? 'down right now'
+                : 'time since last incident'
+              : 'no incidents recorded'
+          }
+          tone={kpis.lastIncidentOngoing ? 'down' : 'neutral'}
         />
       </div>
 

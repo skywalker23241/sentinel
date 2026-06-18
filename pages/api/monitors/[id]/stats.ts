@@ -7,6 +7,7 @@ import {
   getMonitorLatencyStats,
   getMonitorUptimePercent,
   getMonitorWindowIncidents,
+  pickLatencySeries,
 } from '@/util/uptime'
 import {
   parseTimeRange,
@@ -100,9 +101,7 @@ export default async function handler(req: NextRequest): Promise<Response> {
   const windowSec = timeRangeToSeconds(range)
   const latency = state.latency[id]
   const useRecent = range === '24h'
-  const preferredSeries = useRecent ? latency?.recent : latency?.all
-  const series =
-    preferredSeries && preferredSeries.length >= 2 ? preferredSeries : latency?.recent ?? []
+  const series = pickLatencySeries(latency, useRecent)
   const cutoff = Math.floor(Date.now() / 1000) - windowSec
   const responseSeries = series
     .filter((sample) => sample.time >= cutoff)

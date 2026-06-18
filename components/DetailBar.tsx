@@ -130,6 +130,11 @@ export default function DetailBar({
       let incidentReasons: string[] = []
 
       for (let incident of monitorIncidents) {
+        // Exclude planned maintenance and false positives from downtime, matching
+        // getMonitorUptimePercent and the stats API so the bars agree with the
+        // headline uptime%. (The zero-width 'dummy' seed has no overlap, so it
+        // needs no special-casing here.)
+        if (incident.severity === 'maintenance' || incident.severity === 'false_positive') continue
         const incidentStart = incident.start[0]
         const incidentEnd = incident.end ?? currentTime
 

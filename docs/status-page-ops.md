@@ -13,10 +13,13 @@ internal API URLs, private server IPs, or webhook tokens.
 | `/healthz` | External uptime probe for the status page itself. | `no-store` |
 | `/status.json` | Machine-readable current summary, monitor uptime windows, and latest incidents. | 30s |
 | `/incidents.json?limit=50` | Machine-readable incident feed. `limit` is clamped to 1-100. | 60s |
+| `/api/monitors/{id}/stats?range=24h` | Per-monitor JSON: uptime%, latency distribution, recent incidents, and uptime bars for the given `range` (`24h`/`7d`/`30d`/`90d`, default `24h`). | 10s |
 | `/rss.xml` | RSS incident feed for subscribers. | 60s |
 | `/robots.txt` | Search crawler policy and sitemap discovery. | 1h |
 | `/sitemap.xml` | Home, incidents, feeds, and per-service pages. | 1h |
 | `/site.webmanifest` | Installable app metadata and theme color. | 1d |
+
+Unlike the rows above, `/api/monitors/{id}/stats` has no friendly rewrite alias — it is served directly from `pages/api/monitors/[id]/stats.ts`. It stays public (and externally monitorable) because the Basic-auth middleware matcher already excludes all `/api/*` paths, and `robots.txt` allows the whole site. Its shorter 10s cache reflects that it backs near-real-time per-monitor views.
 
 ## External Monitoring
 

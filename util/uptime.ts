@@ -38,7 +38,14 @@ export function getMonitorUptimePercent(
 }
 
 /**
- * Mean recent latency (12h window) for a single monitor.
+ * Mean latency for a single monitor.
+ *
+ * - Without `windowSec`, averages the full `recent` probe series.
+ * - With `windowSec`, delegates to {@link getMonitorLatencyStats} (respecting
+ *   `useRecent` for series selection) so the value matches the latency strip and
+ *   chart shown for the same time range.
+ *
+ * Returns `null` when there are no samples in scope.
  */
 export function getMonitorAvgLatency(
   state: MonitorState,
@@ -66,6 +73,23 @@ export type LatencyStats = {
   count: number
 }
 
+type LatencySample = MonitorState['latency'][string]['recent'][number]
+
+/**
+ * Pick the latency series that backs a given range, mirroring DetailChart:
+ * the 24h range (`useRecent`) reads the high-resolution `recent` series; longer
+ * ranges read the hourly `all` series, falling back to `recent` when `all` has
+ * too few points. Returns `[]` when the monitor has no latency data.
+ */
+export function pickLatencySeries(
+  latency: MonitorState['latency'][string] | undefined,
+  useRecent: boolean
+): LatencySample[] {
+  if (!latency) return []
+  const preferred = useRecent ? latency.recent : latency.all
+  return preferred && preferred.length >= 2 ? preferred : latency.recent ?? []
+}
+
 /**
  * Latency distribution (avg / p50 / p95 / p99 / max / min) over a time window.
  *
@@ -84,12 +108,8 @@ export function getMonitorLatencyStats(
   windowSec: number,
   useRecent: boolean
 ): LatencyStats | null {
-  const latency = state.latency[monitorId]
-  if (!latency) return null
-
-  const preferred = useRecent ? latency.recent : latency.all
-  const series = preferred && preferred.length >= 2 ? preferred : latency.recent
-  if (!series || series.length === 0) return null
+  const series = pickLatencySeries(state.latency[monitorId], useRecent)
+  if (series.length === 0) return null
 
   const cutoff = Date.now() / 1000 - windowSec
   const pings = series

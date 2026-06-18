@@ -4,12 +4,7 @@ import { Tooltip } from '@mantine/core'
 import StatusIcon, { type StatusIconTone } from '@/components/StatusIcon'
 import DetailBar from '@/components/DetailBar'
 import DetailChart from '@/components/DetailChart'
-import {
-  getMonitorAvgLatency,
-  getMonitorRecentSampleUptimePercent,
-  getMonitorUptimePercent,
-  isMonitorDown,
-} from '@/util/uptime'
+import { getMonitorAvgLatency, getMonitorUptimePercent, isMonitorDown } from '@/util/uptime'
 import { getStatusTone } from '@/util/color'
 import { maintenances as configuredMaintenances } from '@/uptime.config'
 import type { ViewMode, TimeRange } from '@/hooks/useViewPreferences'
@@ -60,11 +55,9 @@ export default function MonitorCard({
   const tone = resolveTone(state, monitor)
   const hasData = !!state.latency[monitor.id]
   const windowSec = timeRangeToSeconds(timeRange)
-  const uptimePercent = hasData
-    ? timeRange === '24h'
-      ? getMonitorRecentSampleUptimePercent(state, monitor.id, windowSec)
-      : getMonitorUptimePercent(state, monitor.id, windowSec)
-    : null
+  // Time-weighted, incident-based uptime for every range so the card matches the
+  // detail panel / modal / stats API (which all use getMonitorUptimePercent).
+  const uptimePercent = hasData ? getMonitorUptimePercent(state, monitor.id, windowSec) : null
   const avgLatency = hasData
     ? getMonitorAvgLatency(state, monitor.id, windowSec, timeRange === '24h')
     : null

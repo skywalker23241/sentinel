@@ -57,7 +57,14 @@ export default function DetailBar({
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
 
-  const recentSamples = [...recentLatency].sort((a, b) => a.time - b.time).slice(-recentSampleCount)
+  const cutoff = currentTime - totalDays * 86400
+  const recentSamples =
+    timeRange === '24h'
+      ? [...recentLatency]
+          .filter((sample) => sample.time >= cutoff)
+          .sort((a, b) => a.time - b.time)
+          .slice(-recentSampleCount)
+      : []
 
   if (recentSamples.length > 0) {
     for (let index = 0; index < recentSamples.length; index++) {

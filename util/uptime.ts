@@ -40,11 +40,20 @@ export function getMonitorUptimePercent(
 /**
  * Mean recent latency (12h window) for a single monitor.
  */
-export function getMonitorAvgLatency(state: MonitorState, monitorId: string): number | null {
-  const recent = state.latency[monitorId]?.recent
-  if (!recent || recent.length === 0) return null
-  const total = recent.reduce((acc, p) => acc + p.ping, 0)
-  return total / recent.length
+export function getMonitorAvgLatency(
+  state: MonitorState,
+  monitorId: string,
+  windowSec?: number,
+  useRecent = false
+): number | null {
+  if (!windowSec) {
+    const recent = state.latency[monitorId]?.recent
+    if (!recent || recent.length === 0) return null
+    const total = recent.reduce((acc, p) => acc + p.ping, 0)
+    return total / recent.length
+  }
+
+  return getMonitorLatencyStats(state, monitorId, windowSec, useRecent)?.avg ?? null
 }
 
 export type LatencyStats = {
@@ -123,18 +132,41 @@ export function getMonitorIncidentAt(state: MonitorState, monitorId: string, tim
  */
 export function getMonitorRecentSampleUptimePercent(
   state: MonitorState,
-  monitorId: string
+  monitorId: string,
+  windowSec?: number
 ): number | null {
   const recent = state.latency[monitorId]?.recent
   if (!recent || recent.length === 0) return null
 
+  const cutoff = windowSec ? Date.now() / 1000 - windowSec : null
+  const samples = cutoff ? recent.filter((sample) => sample.time >= cutoff) : recent
+  if (samples.length === 0) return null
+
   let upCount = 0
-  for (const sample of recent) {
+  for (const sample of samples) {
     const isUp = sample.up ?? !getMonitorIncidentAt(state, monitorId, sample.time)
     if (isUp) upCount++
   }
 
-  return (upCount / recent.length) * 100
+  return (upCount / samples.length) * 100
+}
+
+export function getMonitorWindowIncidents(
+  state: MonitorState,
+  monitorId: string,
+  windowSec: number,
+  now = Date.now() / 1000
+) {
+  const from = now - windowSec
+  return (state.incident[monitorId] || [])
+    .filter((incident) => {
+      if (incident.error?.[0] === 'dummy') return false
+      const start = incident.start[0]
+      const end = incident.end ?? now
+      return end >= from && start <= now
+    })
+    .slice()
+    .reverse()
 }
 
 /**
@@ -182,7 +214,7 @@ export function getDashboardKpis(
       uptimeCount++
     }
 
-    const lat = getMonitorAvgLatency(state, m.id)
+    const lat = getMonitorAvgLatency(state, m.id, uptimeWindowSec, uptimeWindowSec === 86400)
     if (lat !== null && Number.isFinite(lat)) {
       latencySum += lat
       latencyCount++

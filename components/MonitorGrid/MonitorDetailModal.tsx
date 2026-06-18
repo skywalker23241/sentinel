@@ -5,7 +5,12 @@ import DetailBar from '@/components/DetailBar'
 import DetailChart from '@/components/DetailChart'
 import LatencyStats from '@/components/LatencyStats'
 import { severityMeta } from '@/components/IncidentCard'
-import { getMonitorAvgLatency, getMonitorUptimePercent, isMonitorDown } from '@/util/uptime'
+import {
+  getMonitorAvgLatency,
+  getMonitorUptimePercent,
+  getMonitorWindowIncidents,
+  isMonitorDown,
+} from '@/util/uptime'
 import { maintenances as configuredMaintenances } from '@/uptime.config'
 import type { TimeRange } from '@/hooks/useViewPreferences'
 import { timeRangeToSeconds } from '@/hooks/useViewPreferences'
@@ -55,16 +60,13 @@ export default function MonitorDetailModal({
 
   const tone = resolveTone(state, monitor)
   const hasData = !!state.latency[monitor.id]
-  const uptime = hasData
-    ? getMonitorUptimePercent(state, monitor.id, timeRangeToSeconds(timeRange))
+  const windowSec = timeRangeToSeconds(timeRange)
+  const uptime = hasData ? getMonitorUptimePercent(state, monitor.id, windowSec) : null
+  const latency = hasData
+    ? getMonitorAvgLatency(state, monitor.id, windowSec, timeRange === '24h')
     : null
-  const latency = hasData ? getMonitorAvgLatency(state, monitor.id) : null
 
-  const incidents = (state.incident[monitor.id] || [])
-    .filter((i) => i.error?.[0] !== 'dummy')
-    .slice()
-    .reverse()
-    .slice(0, 10)
+  const incidents = getMonitorWindowIncidents(state, monitor.id, windowSec).slice(0, 10)
 
   return (
     <Modal

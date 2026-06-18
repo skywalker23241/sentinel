@@ -157,7 +157,7 @@ export default function StatusHero({
         <KpiCard
           label="Avg latency"
           value={formatLatency(kpis.avgLatencyMs)}
-          hint="recent 12h window"
+          hint={`last ${timeRange} · all monitors`}
         />
         <KpiCard
           label={kpis.lastIncidentOngoing ? 'Ongoing incident' : 'Last incident'}

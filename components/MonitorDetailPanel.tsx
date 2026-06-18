@@ -5,7 +5,12 @@ import StatusIcon, { type StatusIconTone } from '@/components/StatusIcon'
 import DetailBar from '@/components/DetailBar'
 import DetailChart from '@/components/DetailChart'
 import LatencyStats from '@/components/LatencyStats'
-import { getMonitorAvgLatency, getMonitorUptimePercent, isMonitorDown } from '@/util/uptime'
+import {
+  getMonitorAvgLatency,
+  getMonitorUptimePercent,
+  getMonitorWindowIncidents,
+  isMonitorDown,
+} from '@/util/uptime'
 import { maintenances as configuredMaintenances } from '@/uptime.config'
 import type { TimeRange } from '@/hooks/useViewPreferences'
 import { timeRangeToSeconds } from '@/hooks/useViewPreferences'
@@ -87,17 +92,13 @@ export default function MonitorDetailPanel({
 
   const tone = resolveTone(state, monitor)
   const hasData = !!state.latency[monitor.id]
-  const uptime = hasData
-    ? getMonitorUptimePercent(state, monitor.id, timeRangeToSeconds(timeRange))
+  const windowSec = timeRangeToSeconds(timeRange)
+  const uptime = hasData ? getMonitorUptimePercent(state, monitor.id, windowSec) : null
+  const avgLatency = hasData
+    ? getMonitorAvgLatency(state, monitor.id, windowSec, timeRange === '24h')
     : null
-  const avgLatency = hasData ? getMonitorAvgLatency(state, monitor.id) : null
   const currentLatency = hasData ? getCurrentLatency(state, monitor.id) : null
-  // Drop the worker's seeded 'dummy' placeholder so it never counts or shows.
-  const incidents = (state.incident[monitor.id] || [])
-    .filter((i) => i.error?.[0] !== 'dummy')
-    .slice()
-    .reverse()
-    .slice(0, 10)
+  const incidents = getMonitorWindowIncidents(state, monitor.id, windowSec).slice(0, 10)
 
   return (
     <section className={classes.panel} aria-label={`${monitor.name} details`}>
@@ -153,7 +154,7 @@ export default function MonitorDetailPanel({
             <div className={classes.metricItem}>
               <span>Avg. response</span>
               <strong>{formatLatency(avgLatency)}</strong>
-              <small>recent 12h</small>
+              <small>{timeRange.toUpperCase()}</small>
             </div>
             <div className={classes.metricItem}>
               <span>Uptime</span>
@@ -163,7 +164,7 @@ export default function MonitorDetailPanel({
             <div className={classes.metricItem}>
               <span>Incidents</span>
               <strong>{incidents.length}</strong>
-              <small>recent records</small>
+              <small>{timeRange.toUpperCase()}</small>
             </div>
           </div>
 

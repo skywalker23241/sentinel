@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react'
+import {
+  TIME_RANGES,
+  timeRangeToDays,
+  timeRangeToSeconds,
+  type TimeRange,
+} from '@/util/timeRange'
 
 export type ViewMode = 'compact' | 'standard' | 'detailed'
-export type TimeRange = '24h' | '7d' | '30d' | '90d'
+export { TIME_RANGES, timeRangeToDays, timeRangeToSeconds, type TimeRange }
 
 export type ViewPreferences = {
   viewMode: ViewMode
@@ -24,10 +30,19 @@ const defaultPrefs: ViewPreferences = {
 function readPrefs(): ViewPreferences {
   if (typeof window === 'undefined') return defaultPrefs
   try {
+    const params = new URLSearchParams(window.location.search)
+    const urlRange = params.get('range')
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return defaultPrefs
+    if (!raw) {
+      return TIME_RANGES.includes(urlRange as TimeRange)
+        ? { ...defaultPrefs, timeRange: urlRange as TimeRange }
+        : defaultPrefs
+    }
     const parsed = JSON.parse(raw) as Partial<ViewPreferences>
-    return { ...defaultPrefs, ...parsed }
+    const merged = { ...defaultPrefs, ...parsed }
+    return TIME_RANGES.includes(urlRange as TimeRange)
+      ? { ...merged, timeRange: urlRange as TimeRange }
+      : merged
   } catch {
     return defaultPrefs
   }
@@ -58,6 +73,9 @@ export function useViewPreferences(): [
     if (typeof window === 'undefined') return
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
+      const url = new URL(window.location.href)
+      url.searchParams.set('range', prefs.timeRange)
+      window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
     } catch {
       /* quota / disabled storage – ignore */
     }
@@ -69,33 +87,3 @@ export function useViewPreferences(): [
   return [prefs, setPrefs]
 }
 
-/**
- * Convert a TimeRange enum to seconds. Used by DetailChart to slice data.
- */
-export function timeRangeToSeconds(range: TimeRange): number {
-  switch (range) {
-    case '24h':
-      return 24 * 60 * 60
-    case '7d':
-      return 7 * 24 * 60 * 60
-    case '30d':
-      return 30 * 24 * 60 * 60
-    case '90d':
-    default:
-      return 90 * 24 * 60 * 60
-  }
-}
-
-export function timeRangeToDays(range: TimeRange): number {
-  switch (range) {
-    case '24h':
-      return 1
-    case '7d':
-      return 7
-    case '30d':
-      return 30
-    case '90d':
-    default:
-      return 90
-  }
-}

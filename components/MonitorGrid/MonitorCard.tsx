@@ -7,11 +7,13 @@ import DetailChart from '@/components/DetailChart'
 import {
   getMonitorAvgLatency,
   getMonitorRecentSampleUptimePercent,
+  getMonitorUptimePercent,
   isMonitorDown,
 } from '@/util/uptime'
 import { getStatusTone } from '@/util/color'
 import { maintenances as configuredMaintenances } from '@/uptime.config'
 import type { ViewMode, TimeRange } from '@/hooks/useViewPreferences'
+import { timeRangeToSeconds } from '@/hooks/useViewPreferences'
 import classes from '@/styles/MonitorCard.module.css'
 
 const stripClass: Record<StatusIconTone, string> = {
@@ -57,8 +59,15 @@ export default function MonitorCard({
 }) {
   const tone = resolveTone(state, monitor)
   const hasData = !!state.latency[monitor.id]
-  const uptimePercent = hasData ? getMonitorRecentSampleUptimePercent(state, monitor.id) : null
-  const avgLatency = hasData ? getMonitorAvgLatency(state, monitor.id) : null
+  const windowSec = timeRangeToSeconds(timeRange)
+  const uptimePercent = hasData
+    ? timeRange === '24h'
+      ? getMonitorRecentSampleUptimePercent(state, monitor.id, windowSec)
+      : getMonitorUptimePercent(state, monitor.id, windowSec)
+    : null
+  const avgLatency = hasData
+    ? getMonitorAvgLatency(state, monitor.id, windowSec, timeRange === '24h')
+    : null
 
   const uptimeStr = uptimePercent !== null ? uptimePercent.toFixed(2) : '—'
   const uptimeColor =

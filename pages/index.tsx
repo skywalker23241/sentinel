@@ -1,4 +1,3 @@
-import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import { Center, Text } from '@mantine/core'
 import { IconLayoutDashboard } from '@tabler/icons-react'
@@ -9,11 +8,13 @@ import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
 
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import PageHead from '@/components/PageHead'
 import StatusHero from '@/components/StatusHero/StatusHero'
 import Toolbar from '@/components/Toolbar/Toolbar'
 import MonitorGrid from '@/components/MonitorGrid/MonitorGrid'
 import MonitorDetailModal from '@/components/MonitorGrid/MonitorDetailModal'
 import MonitorDetailPanel from '@/components/MonitorDetailPanel'
+import SubscriptionLinks from '@/components/SubscriptionLinks'
 
 import { useLiveState } from '@/hooks/useLiveState'
 import { useViewPreferences } from '@/hooks/useViewPreferences'
@@ -42,10 +43,7 @@ export default function Home({
   if (!initialState) {
     return (
       <>
-        <Head>
-          <title>{pageConfig.title}</title>
-          <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
-        </Head>
+        <PageHead />
         <main>
           <Header />
           <Center mt="xl">
@@ -98,10 +96,7 @@ function Dashboard({
     if (monitor) {
       return (
         <>
-          <Head>
-            <title>{pageConfig.title}</title>
-            <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
-          </Head>
+          <PageHead />
           <main className="page-shell">
             <div className="page-main" style={{ maxWidth: '900px' }}>
               <MonitorDetailModal
@@ -123,10 +118,7 @@ function Dashboard({
 
   return (
     <>
-      <Head>
-        <title>{pageConfig.title}</title>
-        <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
-      </Head>
+      <PageHead />
 
       <div className="page-shell">
         <Header />
@@ -194,6 +186,7 @@ function Dashboard({
                 maintenances={maintenances}
                 timeRange={prefs.timeRange}
               />
+              <SubscriptionLinks />
               {selectedMonitor ? (
                 <MonitorDetailPanel
                   monitor={selectedMonitor}

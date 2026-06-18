@@ -4,6 +4,11 @@ import { MaintenanceConfig, PageConfig, WorkerConfig } from './types/config'
 const pageConfig: PageConfig = {
   // 状态页标题
   title: 'Abo的监控站',
+  description: '展示 Abo 个人服务的可用性、响应时间、事件历史和运行状态。',
+
+  // 可选：生产域名。用于 sitemap / canonical / RSS 里的绝对 URL。
+  // 本地开发或未配置时会自动从请求 Host 推断。
+  siteUrl: undefined,
 
   // 顶部导航链接
   links: [
@@ -11,6 +16,13 @@ const pageConfig: PageConfig = {
     { link: 'https://github.com/skywalker23241', label: 'Github', highlight: true },
     { link: 'https://www.hopp.bio/junbo-le/', label: 'Social', highlight: true },
     { link: 'https://www.abo.qzz.io/', label: 'Resume', highlight: true },
+  ],
+
+  // 公开订阅 / 数据入口。只放公共 URL，不要放 Webhook token 或私密邮箱 API。
+  subscriptions: [
+    { type: 'rss', label: 'RSS', url: '/rss.xml' },
+    { type: 'json', label: 'Status JSON', url: '/status.json' },
+    { type: 'json', label: 'Incidents JSON', url: '/incidents.json' },
   ],
 
   // 分组展示（可选）。分组标题为界面文案，统一英文；品牌名与监控项名称保留。

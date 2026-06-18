@@ -2,7 +2,10 @@ import type { Env } from '../worker/src'
 
 export type PageConfig = {
   title?: string
+  description?: string
+  siteUrl?: string
   links?: PageConfigLink[]
+  subscriptions?: PageConfigSubscription[]
   group?: PageConfigGroup
   favicon?: string
   maintenances?: {
@@ -27,6 +30,12 @@ export type PageConfigLink = {
   link: string
   label: string
   highlight?: boolean
+}
+
+export type PageConfigSubscription = {
+  type: 'rss' | 'telegram' | 'email' | 'webhook' | 'json'
+  label: string
+  url: string
 }
 
 export type MonitorTarget = {

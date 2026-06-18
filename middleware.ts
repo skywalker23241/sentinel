@@ -24,4 +24,17 @@ export async function middleware(request: NextRequest) {
       )
     }
   }
+
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Keep public machine endpoints and Next internals out of the optional
+     * Basic-auth middleware. They must stay externally monitorable and easy
+     * for feed readers/crawlers to fetch.
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|healthz|status.json|incidents.json|rss.xml|robots.txt|sitemap.xml|site.webmanifest).*)',
+  ],
 }

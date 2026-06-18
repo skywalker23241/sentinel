@@ -1,5 +1,5 @@
 import { Anchor, ScrollArea, Text } from '@mantine/core'
-import { IconArrowLeft, IconExternalLink } from '@tabler/icons-react'
+import { IconArrowLeft, IconExternalLink, IconLink } from '@tabler/icons-react'
 import type { MonitorState, MonitorTarget, IncidentSeverity } from '@/types/config'
 import StatusIcon, { type StatusIconTone } from '@/components/StatusIcon'
 import DetailBar from '@/components/DetailBar'
@@ -124,6 +124,12 @@ export default function MonitorDetailPanel({
 
       <div className={classes.actionRow}>
         <span className={classes.methodBadge}>{monitor.method ?? 'GET'}</span>
+        <Anchor
+          href={`/services/${encodeURIComponent(monitor.id)}`}
+          className={classes.externalLink}
+        >
+          Public detail <IconLink size={15} />
+        </Anchor>
         {monitor.statusPageLink && (
           <Anchor
             href={monitor.statusPageLink}

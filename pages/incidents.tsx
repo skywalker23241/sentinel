@@ -1,8 +1,7 @@
-import Head from 'next/head'
-
 import { MaintenanceConfig, MonitorState, MonitorTarget } from '@/types/config'
 import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
 import Header from '@/components/Header'
+import PageHead from '@/components/PageHead'
 import { Box, Button, Center, Container, Group, Select, Text } from '@mantine/core'
 import Footer from '@/components/Footer'
 import { useEffect, useState } from 'react'
@@ -118,10 +117,11 @@ export default function IncidentsPage({
 
   return (
     <>
-      <Head>
-        <title>{pageConfig.title}</title>
-        <link rel="icon" href={pageConfig.favicon ?? '/favicon.ico'} />
-      </Head>
+      <PageHead
+        title={`Incident History · ${pageConfig.title}`}
+        description="查看 Abo 个人服务的故障、降级和计划维护历史。"
+        path="/incidents"
+      />
 
       <main className="page-shell">
         <Header style={{ marginBottom: '40px' }} />

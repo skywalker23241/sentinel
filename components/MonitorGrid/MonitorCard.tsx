@@ -147,6 +147,13 @@ export default function MonitorCard({
           {avgLatency !== null && (
             <div className={classes.metaRow}>
               <span className={classes.metaItem}>Avg latency: {Math.round(avgLatency)} ms</span>
+              <a
+                href={`/services/${encodeURIComponent(monitor.id)}`}
+                className={classes.detailLink}
+                onClick={(e) => e.stopPropagation()}
+              >
+                Detail
+              </a>
             </div>
           )}
         </div>

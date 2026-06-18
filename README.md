@@ -40,6 +40,21 @@ Some screenshots:
 
 Please refer to [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
 
+## ABO Custom Notes
+
+This repo includes personal status-page enhancements:
+
+- Public status API: `/status.json`
+- Public incident API: `/incidents.json`
+- RSS feed: `/rss.xml`
+- External health probe: `/healthz`
+- Per-service status pages: `/services/[monitor-id]`
+- Discovery files: `/robots.txt`, `/sitemap.xml`
+- Web app manifest: `/site.webmanifest`
+
+Operational, security, and subscription notes are documented in
+[docs/status-page-ops.md](docs/status-page-ops.md).
+
 ## 🚀Upgrade existing deployments
 
 Get the latest features right away with [simple upgrade process](https://github.com/lyc8503/UptimeFlare/wiki/Synchronize-updates-from-upstream)

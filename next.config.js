@@ -10,7 +10,7 @@ const csp = [
   "base-uri 'self'",
   "img-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV !== 'production' ? " 'unsafe-eval'" : ''}`,
   "font-src 'self' data:",
   "connect-src 'self'",
   "object-src 'none'",
@@ -28,6 +28,17 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  async rewrites() {
+    return [
+      { source: '/status.json', destination: '/api/status-json' },
+      { source: '/incidents.json', destination: '/api/incidents-json' },
+      { source: '/rss.xml', destination: '/api/rss' },
+      { source: '/healthz', destination: '/api/healthz' },
+      { source: '/robots.txt', destination: '/api/robots' },
+      { source: '/sitemap.xml', destination: '/api/sitemap' },
+      { source: '/site.webmanifest', destination: '/api/manifest' },
+    ]
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
   },

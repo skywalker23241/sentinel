@@ -187,6 +187,16 @@
   gap: 4px;
 }
 
+.detailLink {
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.detailLink:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 36em) {
   .card {
     padding: var(--mantine-spacing-sm);

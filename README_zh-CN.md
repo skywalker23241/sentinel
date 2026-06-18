@@ -38,3 +38,17 @@
 ## ⚡快速入门 / 📄文档
 
 请参阅 [Wiki](https://github.com/lyc8503/UptimeFlare/wiki)
+
+## ABO 定制说明
+
+本仓库已增加个人监控站增强项：
+
+- 公开状态接口：`/status.json`
+- 公开事件接口：`/incidents.json`
+- RSS 订阅：`/rss.xml`
+- 外部探活接口：`/healthz`
+- 单服务状态页：`/services/[monitor-id]`
+- 搜索引擎发现：`/robots.txt`、`/sitemap.xml`
+- PWA 元数据：`/site.webmanifest`
+
+运维、安全和订阅配置约定见 [docs/status-page-ops.md](docs/status-page-ops.md)。
